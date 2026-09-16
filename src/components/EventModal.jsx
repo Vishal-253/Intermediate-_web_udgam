@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 
-export default function EventModal({ event, onClose, onRegisterEvent }) {
+export default function EventModal({ event, onClose, onContactTeam }) {
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') onClose();
@@ -60,11 +60,14 @@ export default function EventModal({ event, onClose, onRegisterEvent }) {
               type="button"
               className="btn btn-primary btn-bloom"
               onClick={() => {
-                onClose();
-                onRegisterEvent('Blossom Pass (₹299)');
+                if (onContactTeam) {
+                  onContactTeam();
+                } else {
+                  onClose();
+                }
               }}
             >
-              <span>Register for this Event</span>
+              <span>Contact Event Conveners</span>
               <span>🌸</span>
             </button>
           </div>

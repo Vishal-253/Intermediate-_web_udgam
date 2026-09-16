@@ -1,11 +1,20 @@
 import React, { useState, useEffect } from 'react';
 
-export default function Navbar({ onClaimPassClick }) {
+export default function Navbar({ onClaimPassClick, currentPage = 'home', onNavigate }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('hero');
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
+    if (currentPage === 'merch') {
+      setActiveSection('merch');
+      return;
+    }
+    if (currentPage === 'team') {
+      setActiveSection('team');
+      return;
+    }
+
     const handleScroll = () => {
       const scrollPos = window.pageYOffset;
       setIsScrolled(scrollPos > 30);
@@ -22,17 +31,25 @@ export default function Navbar({ onClaimPassClick }) {
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [currentPage]);
 
-  const handleLinkClick = () => {
+  const handleLinkClick = (e, targetPage, sectionId) => {
     setIsMenuOpen(false);
+    if (onNavigate) {
+      e.preventDefault();
+      onNavigate(targetPage, sectionId);
+    }
   };
 
   return (
-    <header className={`navbar-transparent-header ${isScrolled ? 'scrolled' : ''}`} id="main-header">
+    <header className={`navbar-transparent-header ${isScrolled || currentPage === 'merch' || currentPage === 'team' ? 'scrolled' : ''}`} id="main-header">
       <div className="nav-container-fluid">
-        {/* Left: Clean, elegant typographic logo exactly like refer_web.jpeg */}
-        <a href="#hero" className="nav-brand-clean" onClick={handleLinkClick}>
+        {/* Left: Clean, elegant typographic logo */}
+        <a
+          href="#hero"
+          className="nav-brand-clean"
+          onClick={(e) => handleLinkClick(e, 'home', 'hero')}
+        >
           <span className="brand-wordmark">UDGAM</span>
         </a>
 
@@ -41,8 +58,8 @@ export default function Navbar({ onClaimPassClick }) {
           <li>
             <a
               href="#hero"
-              className={`nav-text-link ${activeSection === 'hero' ? 'active' : ''}`}
-              onClick={handleLinkClick}
+              className={`nav-text-link ${currentPage === 'home' && activeSection === 'hero' ? 'active' : ''}`}
+              onClick={(e) => handleLinkClick(e, 'home', 'hero')}
             >
               Home
             </a>
@@ -50,8 +67,8 @@ export default function Navbar({ onClaimPassClick }) {
           <li>
             <a
               href="#about"
-              className={`nav-text-link ${activeSection === 'about' ? 'active' : ''}`}
-              onClick={handleLinkClick}
+              className={`nav-text-link ${currentPage === 'home' && activeSection === 'about' ? 'active' : ''}`}
+              onClick={(e) => handleLinkClick(e, 'home', 'about')}
             >
               About
             </a>
@@ -59,8 +76,8 @@ export default function Navbar({ onClaimPassClick }) {
           <li>
             <a
               href="#events"
-              className={`nav-text-link ${activeSection === 'events' ? 'active' : ''}`}
-              onClick={handleLinkClick}
+              className={`nav-text-link ${currentPage === 'home' && activeSection === 'events' ? 'active' : ''}`}
+              onClick={(e) => handleLinkClick(e, 'home', 'events')}
             >
               Events
             </a>
@@ -68,8 +85,8 @@ export default function Navbar({ onClaimPassClick }) {
           <li>
             <a
               href="#schedule"
-              className={`nav-text-link ${activeSection === 'schedule' ? 'active' : ''}`}
-              onClick={handleLinkClick}
+              className={`nav-text-link ${currentPage === 'home' && activeSection === 'schedule' ? 'active' : ''}`}
+              onClick={(e) => handleLinkClick(e, 'home', 'schedule')}
             >
               Schedule
             </a>
@@ -77,8 +94,8 @@ export default function Navbar({ onClaimPassClick }) {
           <li>
             <a
               href="#gallery"
-              className={`nav-text-link ${activeSection === 'gallery' ? 'active' : ''}`}
-              onClick={handleLinkClick}
+              className={`nav-text-link ${currentPage === 'home' && activeSection === 'gallery' ? 'active' : ''}`}
+              onClick={(e) => handleLinkClick(e, 'home', 'gallery')}
             >
               Gallery
             </a>
@@ -86,33 +103,49 @@ export default function Navbar({ onClaimPassClick }) {
           <li>
             <a
               href="#sponsors"
-              className={`nav-text-link ${activeSection === 'sponsors' ? 'active' : ''}`}
-              onClick={handleLinkClick}
+              className={`nav-text-link ${currentPage === 'home' && activeSection === 'sponsors' ? 'active' : ''}`}
+              onClick={(e) => handleLinkClick(e, 'home', 'sponsors')}
             >
               Sponsors
             </a>
           </li>
           <li>
             <a
-              href="#register"
-              className={`nav-text-link ${activeSection === 'register' ? 'active' : ''}`}
-              onClick={handleLinkClick}
+              href="/team"
+              className={`nav-text-link ${currentPage === 'team' ? 'active' : ''}`}
+              onClick={(e) => handleLinkClick(e, 'team')}
             >
-              Passes
+              Team
+            </a>
+          </li>
+          {/* Merch Page Navigation Link */}
+          <li className="nav-merch-item">
+            <a
+              href="/merch"
+              className={`nav-text-link nav-merch-link ${currentPage === 'merch' ? 'active' : ''}`}
+              onClick={(e) => handleLinkClick(e, 'merch')}
+            >
+              <span className="merch-nav-petal">🌸</span>
+              <span>Merch</span>
+              <span className="merch-nav-badge">New</span>
             </a>
           </li>
         </ul>
 
-        {/* Right: Search & Hamburger Icon buttons matching refer_web.jpeg */}
+        {/* Right: Search & Hamburger Icon buttons */}
         <div className="nav-right-actions">
           <button
             type="button"
             className="nav-icon-btn"
             aria-label="Search Events"
             title="Explore & Search Events"
-            onClick={() => {
-              const el = document.getElementById('events');
-              if (el) el.scrollIntoView({ behavior: 'smooth' });
+            onClick={(e) => {
+              if (currentPage !== 'home' && onNavigate) {
+                onNavigate('home', 'events');
+              } else {
+                const el = document.getElementById('events');
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+              }
             }}
           >
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

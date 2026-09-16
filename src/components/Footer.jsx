@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { playChimeNote, chimeFrequencies } from '../utils/audio';
 
-export default function Footer() {
+export default function Footer({ onNavigate }) {
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
 
@@ -12,6 +12,13 @@ export default function Footer() {
       playChimeNote(chimeFrequencies[4]);
       setTimeout(() => setSubscribed(false), 4000);
       setEmail('');
+    }
+  };
+
+  const handleNavClick = (e, page, sectionId) => {
+    if (onNavigate) {
+      e.preventDefault();
+      onNavigate(page, sectionId);
     }
   };
 
@@ -71,12 +78,18 @@ export default function Footer() {
           <div className="footer-links-col">
             <h4 className="footer-col-title">Navigation</h4>
             <ul className="footer-link-list">
-              <li><a href="#hero">Home</a></li>
-              <li><a href="#about">About Fest</a></li>
-              <li><a href="#events">Competitions</a></li>
-              <li><a href="#schedule">Day Itinerary</a></li>
-              <li><a href="#gallery">Memory Wall</a></li>
-              <li><a href="#sponsors">Our Sponsors</a></li>
+              <li><a href="#hero" onClick={(e) => handleNavClick(e, 'home', 'hero')}>Home</a></li>
+              <li><a href="#about" onClick={(e) => handleNavClick(e, 'home', 'about')}>About Fest</a></li>
+              <li><a href="#events" onClick={(e) => handleNavClick(e, 'home', 'events')}>Competitions</a></li>
+              <li><a href="#schedule" onClick={(e) => handleNavClick(e, 'home', 'schedule')}>Day Itinerary</a></li>
+              <li><a href="#gallery" onClick={(e) => handleNavClick(e, 'home', 'gallery')}>Memory Wall</a></li>
+              <li><a href="#sponsors" onClick={(e) => handleNavClick(e, 'home', 'sponsors')}>Our Sponsors</a></li>
+              <li><a href="/team" onClick={(e) => handleNavClick(e, 'team')}>Organizing Team</a></li>
+              <li>
+                <a href="/merch" className="footer-merch-link" onClick={(e) => handleNavClick(e, 'merch')}>
+                  Official Merch 🌸
+                </a>
+              </li>
             </ul>
           </div>
 

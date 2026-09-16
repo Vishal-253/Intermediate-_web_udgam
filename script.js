@@ -255,13 +255,18 @@ document.addEventListener('DOMContentLoaded', () => {
   setInterval(spawnCranes, 19000);
 
   /* ==========================================================================
-     4. COUNTDOWN TIMER TO UDGAM 2026 (MARCH 27, 2026)
+     4. COUNTDOWN TIMER TO UDGAM 2026 (NOVEMBER 6, 2026)
      ========================================================================== */
-  const targetDate = new Date('2026-03-27T09:30:00+05:30').getTime();
+  const targetDate = new Date('2026-11-06T09:30:00+05:30').getTime();
 
   function updateCountdown() {
     const now = new Date().getTime();
     const distance = targetDate - now;
+
+    const elDays = document.getElementById('count-days');
+    const elHours = document.getElementById('count-hours');
+    const elMins = document.getElementById('count-mins');
+    const elSecs = document.getElementById('count-secs');
 
     if (distance > 0) {
       const days = Math.floor(distance / (1000 * 60 * 60 * 24));
@@ -269,15 +274,15 @@ document.addEventListener('DOMContentLoaded', () => {
       const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
       const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-      const elDays = document.getElementById('count-days');
-      const elHours = document.getElementById('count-hours');
-      const elMins = document.getElementById('count-mins');
-      const elSecs = document.getElementById('count-secs');
-
       if (elDays) elDays.textContent = String(days).padStart(2, '0');
       if (elHours) elHours.textContent = String(hours).padStart(2, '0');
       if (elMins) elMins.textContent = String(minutes).padStart(2, '0');
       if (elSecs) elSecs.textContent = String(seconds).padStart(2, '0');
+    } else {
+      if (elDays) elDays.textContent = '00';
+      if (elHours) elHours.textContent = '00';
+      if (elMins) elMins.textContent = '00';
+      if (elSecs) elSecs.textContent = '00';
     }
   }
 

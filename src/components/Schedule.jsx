@@ -17,7 +17,7 @@ export default function Schedule() {
           <span className="section-tag">Festival Itinerary</span>
           <h2 className="section-title">The Blossoming Branch Timeline</h2>
           <p className="section-subtitle">
-            Walk along the flowering branch of celebrations across three unforgettable days.
+            Walk along the flowering branch of celebrations across four unforgettable days (November 6 – 9, 2026).
           </p>
         </div>
 

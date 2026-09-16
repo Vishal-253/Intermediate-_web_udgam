@@ -1,35 +1,42 @@
 import React, { useState, useEffect } from 'react';
 import { playChimeNote, chimeFrequencies } from '../utils/audio';
 
-export default function Hero({ onRegisterClick }) {
-  // Live Countdown to March 27, 2026
-  const [timeLeft, setTimeLeft] = useState({ days: '14', hours: '08', mins: '42', secs: '19' });
+// Festival Start Date: November 6, 2026 at 09:30 AM IST
+const FESTIVAL_START_DATE = new Date('2026-11-06T09:30:00+05:30').getTime();
+
+const calculateTimeLeft = () => {
+  const now = Date.now();
+  const distance = FESTIVAL_START_DATE - now;
+
+  if (distance <= 0) {
+    return { days: '00', hours: '00', mins: '00', secs: '00', isLive: true };
+  }
+
+  const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const mins = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+  const secs = Math.floor((distance % (1000 * 60)) / 1000);
+
+  return {
+    days: String(days).padStart(2, '0'),
+    hours: String(hours).padStart(2, '0'),
+    mins: String(mins).padStart(2, '0'),
+    secs: String(secs).padStart(2, '0'),
+    isLive: false
+  };
+};
+
+export default function Hero({ onTeamClick }) {
+  // Dynamic Live Countdown to November 6, 2026
+  const [timeLeft, setTimeLeft] = useState(calculateTimeLeft);
   const [birds, setBirds] = useState([0, 1, 2]);
 
   useEffect(() => {
-    const targetDate = new Date('2026-03-27T09:30:00+05:30').getTime();
+    setTimeLeft(calculateTimeLeft());
+    const interval = setInterval(() => {
+      setTimeLeft(calculateTimeLeft());
+    }, 1000);
 
-    const updateCountdown = () => {
-      const now = new Date().getTime();
-      const distance = targetDate - now;
-
-      if (distance > 0) {
-        const d = Math.floor(distance / (1000 * 60 * 60 * 24));
-        const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-        const s = Math.floor((distance % (1000 * 60)) / 1000);
-
-        setTimeLeft({
-          days: String(d).padStart(2, '0'),
-          hours: String(h).padStart(2, '0'),
-          mins: String(m).padStart(2, '0'),
-          secs: String(s).padStart(2, '0')
-        });
-      }
-    };
-
-    updateCountdown();
-    const interval = setInterval(updateCountdown, 1000);
     return () => clearInterval(interval);
   }, []);
 
@@ -92,7 +99,7 @@ export default function Hero({ onRegisterClick }) {
             <span className="badge-flower">🌸</span>
             <span>Annual Fest • NIT Sikkim</span>
             <span className="badge-dot">•</span>
-            <span className="badge-date">March 27 – 29, 2026</span>
+            <span className="badge-date">November 6 – 9, 2026</span>
           </div>
 
           <h1 className="hero-title">
@@ -106,7 +113,7 @@ export default function Hero({ onRegisterClick }) {
 
           <p className="hero-desc">
             Where the starlit Himalayan peaks meet the luminous whisper of night blossoms. 
-            Immerse yourself in three unforgettable days of music, engineering marvels, 
+            Immerse yourself in four unforgettable days of music, engineering marvels, 
             fine arts, and cosmic wonder under the Himalayan moon.
           </p>
 
@@ -135,16 +142,21 @@ export default function Hero({ onRegisterClick }) {
 
           {/* Hero CTAs */}
           <div className="hero-actions">
-            <button
-              type="button"
+            <a
+              href="/team"
               className="btn btn-primary btn-bloom"
-              onClick={() => onRegisterClick('Blossom Pass')}
+              onClick={(e) => {
+                if (onTeamClick) {
+                  e.preventDefault();
+                  onTeamClick();
+                }
+              }}
             >
-              <span className="btn-text">Register Now</span>
+              <span className="btn-text">Meet The Team</span>
               <svg className="btn-arrow" viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <path d="M4 10h12M11 5l5 5-5 5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
-            </button>
+            </a>
             <a href="#events" className="btn btn-outline">
               <span>Explore Events</span>
             </a>
@@ -161,14 +173,14 @@ export default function Hero({ onRegisterClick }) {
           <div className="moving-tree-stage">
             {/* State 1: Tree on Cliff with Glowing Lanterns */}
             <img
-              src="./assets/images/sakura-tree-cliff.png"
+              src="./assets/images/home/sakura-tree-cliff.png"
               alt="Swaying Sakura Tree on Cliff with Lanterns"
               className="tree-state-layer state-cliff"
             />
 
             {/* State 2: Tree on Cliff (Alternate Posture / Bare) */}
             <img
-              src="./assets/images/sakura-tree-bare.png"
+              src="./assets/images/home/sakura-tree-bare.png"
               alt="Swaying Sakura Tree Breathing"
               className="tree-state-layer state-bare"
             />

@@ -1,7 +1,8 @@
 export const scheduleDays = [
-  { id: 'day1', num: 'Day 01', title: 'The Sprout (Awakening)', date: 'Friday, March 27' },
-  { id: 'day2', num: 'Day 02', title: 'The Petal Drift', date: 'Saturday, March 28' },
-  { id: 'day3', num: 'Day 03', title: 'The Full Bloom', date: 'Sunday, March 29' },
+  { id: 'day1', num: 'Day 01', title: 'The Sprout (Awakening)', date: 'Friday, November 6' },
+  { id: 'day2', num: 'Day 02', title: 'The Petal Drift', date: 'Saturday, November 7' },
+  { id: 'day3', num: 'Day 03', title: 'The Full Bloom', date: 'Sunday, November 8' },
+  { id: 'day4', num: 'Day 04', title: 'The Grand Finale', date: 'Monday, November 9' },
 ];
 
 export const scheduleItems = {
@@ -77,9 +78,35 @@ export const scheduleItems = {
       venue: 'Amphitheatre Runway'
     },
     {
-      time: '07:30 PM – 11:00 PM',
-      title: 'The Grand Star Pronite & Valedictory Gala',
-      desc: 'Celebrity concert, award ceremonies, lantern release ritual, and grand DJ night.',
+      time: '07:30 PM – 10:30 PM',
+      title: 'Indie Twilight & Electronic Symphony',
+      desc: 'Mesmerizing visual projections accompanied by indie folk artists and atmospheric live sets.',
+      venue: 'Pine Grove Stage'
+    }
+  ],
+  day4: [
+    {
+      time: '10:00 AM – 01:00 PM',
+      title: 'Summit of Innovation: Tech Conclave & Keynotes',
+      desc: 'Visionary keynote talks by industry pioneers, AI showcases, and student research awards.',
+      venue: 'Main Auditorium'
+    },
+    {
+      time: '02:30 PM – 05:00 PM',
+      title: 'Valedictory Ceremony & Prize Distribution',
+      desc: 'Celebrating fest champions, grand trophy felicitations, and honor roll felicitations.',
+      venue: 'Main Auditorium'
+    },
+    {
+      time: '06:00 PM – 07:30 PM',
+      title: 'Lantern Release Ritual & Drone Light Show',
+      desc: 'Thousands of eco-lanterns and synchronized glowing drones illuminate the Ravangla night sky.',
+      venue: 'Central Boulevard & Open Amphitheatre'
+    },
+    {
+      time: '07:30 PM – 11:30 PM',
+      title: 'The Grand Star Pronite & Celebrity Concert',
+      desc: 'Electrifying headline music act, high-octane stage effects, and spectacular closing festival celebration.',
       venue: 'Main Festival Stadium'
     }
   ]

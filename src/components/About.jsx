@@ -48,7 +48,7 @@ export default function About() {
           <div className="about-visual-card card-bloom reveal-on-scroll">
             <div className="visual-img-frame">
               <img
-                src="./assets/images/temple-pagoda.jpg"
+                src="./assets/images/gallery/temple-pagoda.jpg"
                 alt="Pagoda & Torii Gate in Spring Bloom"
                 className="about-feature-img"
               />
@@ -64,9 +64,9 @@ export default function About() {
         <div className="stats-row reveal-on-scroll">
           <div className="stat-card">
             <div className="stat-icon-bg">🌸</div>
-            <div className="stat-number">3</div>
+            <div className="stat-number">4</div>
             <div className="stat-label">Days of Wonder</div>
-            <div className="stat-sub">March 27 – 29, 2026</div>
+            <div className="stat-sub">November 6 – 9, 2026</div>
           </div>
 
           <div className="stat-card">
