@@ -4,7 +4,7 @@ import MerchModal from './MerchModal';
 import LightboxModal from './LightboxModal';
 import { playChimeNote, chimeFrequencies } from '../utils/audio';
 
-export default function MerchPage({ onNavigateHome }) {
+export default function MerchPage({ onNavigateHome, merch = merchData }) {
   const [selectedCategory, setSelectedCategory] = useState('all');
   // State for active image index per product { cap: 0, tshirt: 0, hoodie: 0 }
   const [activeImageIndexes, setActiveImageIndexes] = useState({
@@ -29,10 +29,29 @@ export default function MerchPage({ onNavigateHome }) {
   const [modalItem, setModalItem] = useState(null);
   const [lightboxImage, setLightboxImage] = useState(null);
 
+  const currentMerch = merch || merchData;
+
+  // Dynamically calculated categories with accurate counts
+  const dynamicCategories = [
+    { id: 'all', label: 'All Merch', count: currentMerch.length, icon: '🌸' },
+    { id: 'apparel', label: 'Apparel', count: currentMerch.filter(m => m.categorySlug === 'apparel').length, icon: '👕' },
+    { id: 'headwear', label: 'Headwear', count: currentMerch.filter(m => m.categorySlug === 'headwear').length, icon: '🧢' },
+    ...(currentMerch.some(m => !['apparel', 'headwear'].includes(m.categorySlug))
+      ? [{
+          id: 'accessories',
+          label: 'Accessories & More',
+          count: currentMerch.filter(m => !['apparel', 'headwear'].includes(m.categorySlug)).length,
+          icon: '✨'
+        }]
+      : [])
+  ];
+
   // Filter items
   const filteredItems = selectedCategory === 'all'
-    ? merchData
-    : merchData.filter(item => item.categorySlug === selectedCategory);
+    ? currentMerch
+    : selectedCategory === 'accessories'
+      ? currentMerch.filter(item => !['apparel', 'headwear'].includes(item.categorySlug))
+      : currentMerch.filter(item => item.categorySlug === selectedCategory);
 
   // Cycle to previous image for a product
   const handlePrevImage = (itemId, totalImages) => {
@@ -153,7 +172,7 @@ export default function MerchPage({ onNavigateHome }) {
           {/* Category Filter Tabs */}
           <div className="merch-filter-bar">
             <div className="filter-pill-group">
-              {merchCategories.map(cat => (
+              {dynamicCategories.map(cat => (
                 <button
                   key={cat.id}
                   type="button"

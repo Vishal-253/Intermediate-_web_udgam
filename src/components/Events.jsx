@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { categories, eventsData } from '../data/eventsData';
 
-export default function Events({ onSelectEvent }) {
+export default function Events({ onSelectEvent, events = eventsData }) {
   const [activeCategory, setActiveCategory] = useState('all');
 
+  const currentEvents = events || eventsData;
   const filteredEvents = activeCategory === 'all'
-    ? eventsData
-    : eventsData.filter(e => e.category === activeCategory);
+    ? currentEvents
+    : currentEvents.filter(e => e.category === activeCategory);
 
   return (
     <section id="events" className="section events-section">

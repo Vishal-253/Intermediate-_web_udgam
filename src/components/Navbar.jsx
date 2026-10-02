@@ -14,6 +14,10 @@ export default function Navbar({ onClaimPassClick, currentPage = 'home', onNavig
       setActiveSection('team');
       return;
     }
+    if (currentPage === 'admin') {
+      setActiveSection('admin');
+      return;
+    }
 
     const handleScroll = () => {
       const scrollPos = window.pageYOffset;
@@ -42,7 +46,7 @@ export default function Navbar({ onClaimPassClick, currentPage = 'home', onNavig
   };
 
   return (
-    <header className={`navbar-transparent-header ${isScrolled || currentPage === 'merch' || currentPage === 'team' ? 'scrolled' : ''}`} id="main-header">
+    <header className={`navbar-transparent-header ${isScrolled || currentPage === 'merch' || currentPage === 'team' || currentPage === 'admin' ? 'scrolled' : ''}`} id="main-header">
       <div className="nav-container-fluid">
         {/* Left: Clean, elegant typographic logo */}
         <a
@@ -130,9 +134,19 @@ export default function Navbar({ onClaimPassClick, currentPage = 'home', onNavig
               <span className="merch-nav-badge">New</span>
             </a>
           </li>
+          {/* Mobile-Only Admin Portal Link inside hamburger drawer */}
+          <li className="nav-admin-mobile-item">
+            <a
+              href="/admin"
+              className={`nav-text-link nav-admin-mobile-link ${currentPage === 'admin' ? 'active' : ''}`}
+              onClick={(e) => handleLinkClick(e, 'admin')}
+            >
+              <span>🛡️ Admin Portal</span>
+            </a>
+          </li>
         </ul>
 
-        {/* Right: Search & Hamburger Icon buttons */}
+        {/* Right: Search & Desktop Admin & Mobile Hamburger */}
         <div className="nav-right-actions">
           <button
             type="button"
@@ -154,6 +168,23 @@ export default function Navbar({ onClaimPassClick, currentPage = 'home', onNavig
             </svg>
           </button>
 
+          {/* Desktop Admin Portal Button: Replaces the hamburger on desktop viewports */}
+          <button
+            type="button"
+            className={`nav-admin-btn ${currentPage === 'admin' ? 'active' : ''}`}
+            onClick={(e) => handleLinkClick(e, 'admin')}
+            title="Open Admin Control Panel"
+            aria-label="Admin Portal"
+          >
+            <span className="nav-admin-icon-shield">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+            </span>
+            <span className="nav-admin-btn-text">Admin</span>
+          </button>
+
+          {/* Hamburger Menu: Displayed only on mobile/tablet viewports */}
           <button
             type="button"
             className="nav-hamburger-minimal"

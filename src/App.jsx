@@ -15,12 +15,18 @@ import MerchPage from './components/MerchPage';
 import TeamPage from './components/TeamPage';
 import EventModal from './components/EventModal';
 import LightboxModal from './components/LightboxModal';
+import AdminLogin from './components/AdminLogin';
+import AdminDashboard from './components/AdminDashboard';
+import { getStoredMerch, getStoredEvents, checkAdminAuth } from './utils/festivalStore';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState(() => {
     if (typeof window !== 'undefined') {
       const path = window.location.pathname.toLowerCase();
       const hash = window.location.hash.toLowerCase();
+      if (path.includes('/admin') || hash === '#admin' || hash === '#/admin') {
+        return 'admin';
+      }
       if (path.includes('/merch') || hash === '#merch' || hash === '#/merch') {
         return 'merch';
       }
@@ -31,6 +37,10 @@ export default function App() {
     return 'home';
   });
 
+  const [merchList, setMerchList] = useState(getStoredMerch);
+  const [eventsList, setEventsList] = useState(getStoredEvents);
+  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(checkAdminAuth);
+
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
 
@@ -39,7 +49,10 @@ export default function App() {
     const handleLocationChange = () => {
       const path = window.location.pathname.toLowerCase();
       const hash = window.location.hash.toLowerCase();
-      if (path.includes('/merch') || hash === '#merch' || hash === '#/merch') {
+      if (path.includes('/admin') || hash === '#admin' || hash === '#/admin') {
+        setCurrentPage('admin');
+        document.title = 'Control Portal | Udgam 2026 Admin — NIT Sikkim';
+      } else if (path.includes('/merch') || hash === '#merch' || hash === '#/merch') {
         setCurrentPage('merch');
         document.title = 'Official Merchandise | Udgam 2026 — Chase the Bloom';
       } else if (path.includes('/team') || hash === '#team' || hash === '#/team') {
@@ -59,9 +72,24 @@ export default function App() {
     };
   }, []);
 
+  // Sync state if festival data updates from other sources
+  useEffect(() => {
+    const handleDataUpdate = (e) => {
+      if (e.detail?.type === 'merch') {
+        setMerchList(getStoredMerch());
+      } else if (e.detail?.type === 'events') {
+        setEventsList(getStoredEvents());
+      }
+    };
+    window.addEventListener('udgam:data_update', handleDataUpdate);
+    return () => window.removeEventListener('udgam:data_update', handleDataUpdate);
+  }, []);
+
   // Update document title on page change
   useEffect(() => {
-    if (currentPage === 'merch') {
+    if (currentPage === 'admin') {
+      document.title = 'Control Portal | Udgam 2026 Admin — NIT Sikkim';
+    } else if (currentPage === 'merch') {
       document.title = 'Official Merchandise | Udgam 2026 — Chase the Bloom';
     } else if (currentPage === 'team') {
       document.title = 'Organizing Committee & Leads | Udgam 2026 — Chase the Bloom';
@@ -99,7 +127,15 @@ export default function App() {
 
   // Central page & section navigation handler
   const handleNavigate = (page, sectionId) => {
-    if (page === 'merch') {
+    if (page === 'admin') {
+      setCurrentPage('admin');
+      try {
+        window.history.pushState({ page: 'admin' }, '', '/admin');
+      } catch (err) {
+        window.location.hash = '#admin';
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (page === 'merch') {
       setCurrentPage('merch');
       try {
         window.history.pushState({ page: 'merch' }, '', '/merch');
@@ -116,7 +152,7 @@ export default function App() {
       }
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
-      const wasSubpage = currentPage === 'merch' || currentPage === 'team';
+      const wasSubpage = currentPage === 'merch' || currentPage === 'team' || currentPage === 'admin';
       setCurrentPage('home');
       try {
         window.history.pushState({ page: 'home' }, '', '/');
@@ -156,16 +192,38 @@ export default function App() {
       {/* Ambient Chimes Audio Toggle */}
       <SoundControl />
 
-      {/* Header & Navbar */}
-      <Navbar
-        currentPage={currentPage}
-        onNavigate={handleNavigate}
-      />
+      {/* Header & Navbar - Hidden on Admin Page for clean dashboard workspace */}
+      {currentPage !== 'admin' && (
+        <Navbar
+          currentPage={currentPage}
+          onNavigate={handleNavigate}
+        />
+      )}
 
       <main>
-        {currentPage === 'merch' ? (
+        {currentPage === 'admin' ? (
+          /* Admin Control Portal */
+          isAdminLoggedIn ? (
+            <AdminDashboard
+              merchList={merchList}
+              onUpdateMerchList={setMerchList}
+              eventsList={eventsList}
+              onUpdateEventsList={setEventsList}
+              onNavigateHome={() => handleNavigate('home')}
+              onLogout={() => setIsAdminLoggedIn(false)}
+            />
+          ) : (
+            <AdminLogin
+              onLoginSuccess={() => setIsAdminLoggedIn(true)}
+              onNavigateHome={() => handleNavigate('home')}
+            />
+          )
+        ) : currentPage === 'merch' ? (
           /* Dedicated Merchandise Page */
-          <MerchPage onNavigateHome={() => handleNavigate('home')} />
+          <MerchPage
+            onNavigateHome={() => handleNavigate('home')}
+            merch={merchList}
+          />
         ) : currentPage === 'team' ? (
           /* Dedicated Team & Committees Page */
           <TeamPage onNavigateHome={() => handleNavigate('home')} />
@@ -179,7 +237,10 @@ export default function App() {
             <About />
 
             {/* 3. Events Section */}
-            <Events onSelectEvent={(event) => setSelectedEvent(event)} />
+            <Events
+              events={eventsList}
+              onSelectEvent={(event) => setSelectedEvent(event)}
+            />
 
             {/* 4. Schedule Section */}
             <Schedule />
@@ -196,8 +257,10 @@ export default function App() {
         )}
       </main>
 
-      {/* 8. Footer Section */}
-      <Footer onNavigate={handleNavigate} />
+      {/* 8. Footer Section - Hidden on Admin Page */}
+      {currentPage !== 'admin' && (
+        <Footer onNavigate={handleNavigate} />
+      )}
 
       {/* MODALS */}
       <EventModal

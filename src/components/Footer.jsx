@@ -90,6 +90,11 @@ export default function Footer({ onNavigate }) {
                   Official Merch 🌸
                 </a>
               </li>
+              <li>
+                <a href="/admin" className="footer-admin-link" onClick={(e) => handleNavClick(e, 'admin')}>
+                  Admin Portal ⚙️
+                </a>
+              </li>
             </ul>
           </div>
 
