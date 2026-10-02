@@ -8,47 +8,83 @@ export default function PetalCanvas() {
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
 
-    let width = (canvas.width = window.innerWidth);
-    let height = (canvas.height = window.innerHeight);
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    let width = window.innerWidth;
+    let height = window.innerHeight;
+    let isMobile = width < 768;
 
-    const handleResize = () => {
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
+    const setCanvasSize = () => {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      isMobile = width < 768;
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
-    window.addEventListener('resize', handleResize);
 
-    const mouse = { x: -1000, y: -1000, vx: 0, vy: 0, lastX: 0, lastY: 0 };
+    setCanvasSize();
+    window.addEventListener('resize', setCanvasSize);
+
+    const pointer = { x: -1000, y: -1000, vx: 0, vy: 0, lastX: 0, lastY: 0 };
+
     const handleMouseMove = (e) => {
-      mouse.vx = (e.clientX - mouse.lastX) * 0.1;
-      mouse.vy = (e.clientY - mouse.lastY) * 0.1;
-      mouse.lastX = mouse.x = e.clientX;
-      mouse.lastY = mouse.y = e.clientY;
+      pointer.vx = (e.clientX - pointer.lastX) * 0.1;
+      pointer.vy = (e.clientY - pointer.lastY) * 0.1;
+      pointer.lastX = pointer.x = e.clientX;
+      pointer.lastY = pointer.y = e.clientY;
     };
-    window.addEventListener('mousemove', handleMouseMove);
+
+    const handleTouchMove = (e) => {
+      if (e.touches && e.touches[0]) {
+        const touch = e.touches[0];
+        pointer.vx = (touch.clientX - pointer.lastX) * 0.08;
+        pointer.vy = (touch.clientY - pointer.lastY) * 0.08;
+        pointer.lastX = pointer.x = touch.clientX;
+        pointer.lastY = pointer.y = touch.clientY;
+      }
+    };
+
+    const handleTouchEnd = () => {
+      pointer.x = -1000;
+      pointer.y = -1000;
+      pointer.vx = 0;
+      pointer.vy = 0;
+    };
+
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    window.addEventListener('touchmove', handleTouchMove, { passive: true });
+    window.addEventListener('touchstart', handleTouchMove, { passive: true });
+    window.addEventListener('touchend', handleTouchEnd, { passive: true });
 
     class Petal {
-      constructor(isSpawnFromTree = false) {
-        this.reset(isSpawnFromTree);
+      constructor(randomY = true) {
+        this.reset(randomY);
       }
 
-      reset(isSpawnFromTree = false) {
-        if (isSpawnFromTree) {
-          this.x = width * 0.65 + (Math.random() * 200 - 100);
-          this.y = Math.random() * (height * 0.5);
+      reset(randomY = false) {
+        this.x = Math.random() * (width + 120) - 60;
+        this.y = randomY ? Math.random() * height : -Math.random() * 60 - 20;
+
+        if (isMobile) {
+          // Delicate, smaller petals on mobile to keep text crystal clear
+          this.size = 7 + Math.random() * 7;
+          this.speedY = 0.5 + Math.random() * 0.8;
+          this.speedX = 0.25 + Math.random() * 0.65;
+          this.opacity = 0.38 + Math.random() * 0.35;
         } else {
-          this.x = Math.random() * (width + 200) - 100;
-          this.y = Math.random() * -height;
+          this.size = 11 + Math.random() * 14;
+          this.speedY = 0.7 + Math.random() * 1.5;
+          this.speedX = 0.5 + Math.random() * 1.1;
+          this.opacity = 0.52 + Math.random() * 0.38;
         }
 
-        this.size = 12 + Math.random() * 15;
-        this.speedY = 0.8 + Math.random() * 1.7;
-        this.speedX = 0.5 + Math.random() * 1.3;
         this.angle = Math.random() * Math.PI * 2;
-        this.angularSpeed = (Math.random() - 0.5) * 0.035;
+        this.angularSpeed = (Math.random() - 0.5) * (isMobile ? 0.02 : 0.035);
         this.flip = Math.random() * Math.PI * 2;
-        this.flipSpeed = 0.02 + Math.random() * 0.03;
-        this.opacity = 0.55 + Math.random() * 0.4;
-        this.swayFreq = 0.001 + Math.random() * 0.002;
+        this.flipSpeed = 0.015 + Math.random() * 0.025;
+        this.swayFreq = 0.0008 + Math.random() * 0.0016;
         this.swayPhase = Math.random() * Math.PI * 2;
 
         const shades = [
@@ -65,20 +101,22 @@ export default function PetalCanvas() {
         this.angle += this.angularSpeed;
         this.flip += this.flipSpeed;
 
-        const sway = Math.sin(time * this.swayFreq + this.swayPhase) * 0.85;
+        const sway = Math.sin(time * this.swayFreq + this.swayPhase) * (isMobile ? 0.55 : 0.9);
         this.x += this.speedX + sway;
         this.y += this.speedY;
 
-        const dx = this.x - mouse.x;
-        const dy = this.y - mouse.y;
+        // Interactive dispersion on touch/cursor
+        const interactionRadius = isMobile ? 80 : 130;
+        const dx = this.x - pointer.x;
+        const dy = this.y - pointer.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < 140) {
-          const force = (140 - dist) / 140;
-          this.x += (dx / dist) * force * 4.5 + mouse.vx * 0.35;
-          this.y += (dy / dist) * force * 3.5 + mouse.vy * 0.35;
+        if (dist < interactionRadius && dist > 0) {
+          const force = (interactionRadius - dist) / interactionRadius;
+          this.x += (dx / dist) * force * (isMobile ? 3.0 : 4.5) + pointer.vx * 0.3;
+          this.y += (dy / dist) * force * (isMobile ? 2.5 : 3.5) + pointer.vy * 0.3;
         }
 
-        if (this.y > height + 50 || this.x > width + 100 || this.x < -100) {
+        if (this.y > height + 40 || this.x > width + 80 || this.x < -80) {
           this.reset(false);
         }
       }
@@ -90,8 +128,10 @@ export default function PetalCanvas() {
         const scaleY = Math.sin(this.flip);
         ctx.scale(1, scaleY);
 
-        ctx.shadowColor = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, 0.7)`;
-        ctx.shadowBlur = 10;
+        if (!isMobile) {
+          ctx.shadowColor = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, 0.5)`;
+          ctx.shadowBlur = 8;
+        }
 
         ctx.beginPath();
         const s = this.size;
@@ -109,8 +149,8 @@ export default function PetalCanvas() {
         ctx.fillStyle = grad;
         ctx.fill();
 
-        ctx.strokeStyle = `rgba(255, 255, 255, ${this.opacity * 0.6})`;
-        ctx.lineWidth = 0.9;
+        ctx.strokeStyle = `rgba(255, 255, 255, ${this.opacity * 0.5})`;
+        ctx.lineWidth = isMobile ? 0.6 : 0.9;
         ctx.beginPath();
         ctx.moveTo(0, s * 0.8);
         ctx.lineTo(0, -s * 0.3);
@@ -120,12 +160,10 @@ export default function PetalCanvas() {
       }
     }
 
-    const count = Math.min(Math.floor(window.innerWidth / 28), 50);
+    const count = isMobile ? 18 : Math.min(Math.floor(width / 32), 42);
     const petals = [];
     for (let i = 0; i < count; i++) {
-      const p = new Petal(false);
-      p.y = Math.random() * height;
-      petals.push(p);
+      petals.push(new Petal(true));
     }
 
     let animId;
@@ -139,17 +177,13 @@ export default function PetalCanvas() {
     }
     animId = requestAnimationFrame(animate);
 
-    const spawnInterval = setInterval(() => {
-      if (petals.length < 60) {
-        petals.push(new Petal(true));
-      }
-    }, 3500);
-
     return () => {
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('resize', setCanvasSize);
       window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('touchstart', handleTouchMove);
+      window.removeEventListener('touchend', handleTouchEnd);
       cancelAnimationFrame(animId);
-      clearInterval(spawnInterval);
     };
   }, []);
 
