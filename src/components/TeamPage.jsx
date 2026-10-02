@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from 'react';
 import { teamMembers, committeeCategories, committeeMembers } from '../data/teamData';
-import { playChimeNote, chimeFrequencies } from '../utils/audio';
 
 export default function TeamPage({ onNavigateHome }) {
   const [selectedCommittee, setSelectedCommittee] = useState('all');
@@ -28,12 +27,10 @@ export default function TeamPage({ onNavigateHome }) {
 
   const handleCommitteeChange = (catId) => {
     setSelectedCommittee(catId);
-    playChimeNote(chimeFrequencies[0]);
   };
 
   const handleRoleChange = (role) => {
     setRoleFilter(role);
-    playChimeNote(chimeFrequencies[2]);
   };
 
   return (

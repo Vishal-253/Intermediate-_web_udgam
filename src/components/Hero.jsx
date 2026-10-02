@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { playChimeNote, chimeFrequencies } from '../utils/audio';
 
 // Festival Start Date: November 6, 2026 at 09:30 AM IST
 const FESTIVAL_START_DATE = new Date('2026-11-06T09:30:00+05:30').getTime();
@@ -48,11 +47,6 @@ export default function Hero({ onTeamClick }) {
     }, 19000);
     return () => clearInterval(birdInterval);
   }, []);
-
-  const ringLantern = (idx) => {
-    const note = chimeFrequencies[idx % chimeFrequencies.length];
-    playChimeNote(note);
-  };
 
   return (
     <section id="hero" className="hero-section">
@@ -160,33 +154,6 @@ export default function Hero({ onTeamClick }) {
             <a href="#events" className="btn btn-outline">
               <span>Explore Events</span>
             </a>
-          </div>
-        </div>
-
-        {/* Smooth Slow-Moving Sakura Tree (Two Animated States) */}
-        <div
-          className="hero-moving-tree-scene"
-          id="hero-tree-scene"
-          onClick={() => ringLantern(3)}
-          title="Tap tree to ring temple chimes"
-        >
-          <div className="moving-tree-stage">
-            {/* State 1: Tree on Cliff with Glowing Lanterns */}
-            <img
-              src="./assets/images/home/sakura-tree-cliff.png"
-              alt="Swaying Sakura Tree on Cliff with Lanterns"
-              className="tree-state-layer state-cliff"
-            />
-
-            {/* State 2: Tree on Cliff (Alternate Posture / Bare) */}
-            <img
-              src="./assets/images/home/sakura-tree-bare.png"
-              alt="Swaying Sakura Tree Breathing"
-              className="tree-state-layer state-bare"
-            />
-
-            {/* Ambient Bioluminescent Root Glow */}
-            <div className="tree-cliff-ambient-glow" aria-hidden="true"></div>
           </div>
         </div>
       </div>

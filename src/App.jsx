@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import PetalCanvas from './components/PetalCanvas';
 import CursorInsects from './components/CursorInsects';
-import SoundControl from './components/SoundControl';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import About from './components/About';
@@ -11,7 +10,6 @@ import Gallery from './components/Gallery';
 import Sponsors from './components/Sponsors';
 import Team from './components/Team';
 import Footer from './components/Footer';
-import MerchPage from './components/MerchPage';
 import TeamPage from './components/TeamPage';
 import EventModal from './components/EventModal';
 import LightboxModal from './components/LightboxModal';
@@ -26,9 +24,6 @@ export default function App() {
       const hash = window.location.hash.toLowerCase();
       if (path.includes('/admin') || hash === '#admin' || hash === '#/admin') {
         return 'admin';
-      }
-      if (path.includes('/merch') || hash === '#merch' || hash === '#/merch') {
-        return 'merch';
       }
       if (path.includes('/team') || hash === '#team' || hash === '#/team') {
         return 'team';
@@ -52,9 +47,6 @@ export default function App() {
       if (path.includes('/admin') || hash === '#admin' || hash === '#/admin') {
         setCurrentPage('admin');
         document.title = 'Control Portal | Udgam 2026 Admin — NIT Sikkim';
-      } else if (path.includes('/merch') || hash === '#merch' || hash === '#/merch') {
-        setCurrentPage('merch');
-        document.title = 'Official Merchandise | Udgam 2026 — Chase the Bloom';
       } else if (path.includes('/team') || hash === '#team' || hash === '#/team') {
         setCurrentPage('team');
         document.title = 'Organizing Committee & Leads | Udgam 2026 — Chase the Bloom';
@@ -75,9 +67,7 @@ export default function App() {
   // Sync state if festival data updates from other sources
   useEffect(() => {
     const handleDataUpdate = (e) => {
-      if (e.detail?.type === 'merch') {
-        setMerchList(getStoredMerch());
-      } else if (e.detail?.type === 'events') {
+      if (e.detail?.type === 'events') {
         setEventsList(getStoredEvents());
       }
     };
@@ -89,8 +79,6 @@ export default function App() {
   useEffect(() => {
     if (currentPage === 'admin') {
       document.title = 'Control Portal | Udgam 2026 Admin — NIT Sikkim';
-    } else if (currentPage === 'merch') {
-      document.title = 'Official Merchandise | Udgam 2026 — Chase the Bloom';
     } else if (currentPage === 'team') {
       document.title = 'Organizing Committee & Leads | Udgam 2026 — Chase the Bloom';
     } else {
@@ -135,14 +123,6 @@ export default function App() {
         window.location.hash = '#admin';
       }
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else if (page === 'merch') {
-      setCurrentPage('merch');
-      try {
-        window.history.pushState({ page: 'merch' }, '', '/merch');
-      } catch (err) {
-        window.location.hash = '#merch';
-      }
-      window.scrollTo({ top: 0, behavior: 'smooth' });
     } else if (page === 'team') {
       setCurrentPage('team');
       try {
@@ -152,7 +132,7 @@ export default function App() {
       }
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
-      const wasSubpage = currentPage === 'merch' || currentPage === 'team' || currentPage === 'admin';
+      const wasSubpage = currentPage === 'team' || currentPage === 'admin';
       setCurrentPage('home');
       try {
         window.history.pushState({ page: 'home' }, '', '/');
@@ -189,9 +169,6 @@ export default function App() {
       {/* Bioluminescent Cursor-Following Butterfly & Bee */}
       <CursorInsects />
 
-      {/* Ambient Chimes Audio Toggle */}
-      <SoundControl />
-
       {/* Header & Navbar - Hidden on Admin Page for clean dashboard workspace */}
       {currentPage !== 'admin' && (
         <Navbar
@@ -218,12 +195,6 @@ export default function App() {
               onNavigateHome={() => handleNavigate('home')}
             />
           )
-        ) : currentPage === 'merch' ? (
-          /* Dedicated Merchandise Page */
-          <MerchPage
-            onNavigateHome={() => handleNavigate('home')}
-            merch={merchList}
-          />
         ) : currentPage === 'team' ? (
           /* Dedicated Team & Committees Page */
           <TeamPage onNavigateHome={() => handleNavigate('home')} />

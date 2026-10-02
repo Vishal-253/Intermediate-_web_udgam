@@ -675,28 +675,7 @@ document.addEventListener('DOMContentLoaded', () => {
   ];
 
   function playChimeNote(freq) {
-    if (!audioCtx) {
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
-    if (audioCtx.state === 'suspended') {
-      audioCtx.resume();
-    }
-
-    const osc = audioCtx.createOscillator();
-    const gainNode = audioCtx.createGain();
-
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-
-    gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
-    gainNode.gain.linearRampToValueAtTime(0.2, audioCtx.currentTime + 0.02);
-    gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 2.8);
-
-    osc.connect(gainNode);
-    gainNode.connect(audioCtx.destination);
-
-    osc.start(audioCtx.currentTime);
-    osc.stop(audioCtx.currentTime + 3.0);
+    // Sound disabled
   }
 
   const soundBtn = document.getElementById('sound-toggle');

@@ -6,10 +6,6 @@ export default function Navbar({ onClaimPassClick, currentPage = 'home', onNavig
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
-    if (currentPage === 'merch') {
-      setActiveSection('merch');
-      return;
-    }
     if (currentPage === 'team') {
       setActiveSection('team');
       return;
@@ -46,7 +42,7 @@ export default function Navbar({ onClaimPassClick, currentPage = 'home', onNavig
   };
 
   return (
-    <header className={`navbar-transparent-header ${isScrolled || currentPage === 'merch' || currentPage === 'team' || currentPage === 'admin' ? 'scrolled' : ''}`} id="main-header">
+    <header className={`navbar-transparent-header ${isScrolled || currentPage === 'team' || currentPage === 'admin' ? 'scrolled' : ''}`} id="main-header">
       <div className="nav-container-fluid">
         {/* Left: Clean, elegant typographic logo */}
         <a
@@ -122,18 +118,7 @@ export default function Navbar({ onClaimPassClick, currentPage = 'home', onNavig
               Team
             </a>
           </li>
-          {/* Merch Page Navigation Link */}
-          <li className="nav-merch-item">
-            <a
-              href="/merch"
-              className={`nav-text-link nav-merch-link ${currentPage === 'merch' ? 'active' : ''}`}
-              onClick={(e) => handleLinkClick(e, 'merch')}
-            >
-              <span className="merch-nav-petal">🌸</span>
-              <span>Merch</span>
-              <span className="merch-nav-badge">New</span>
-            </a>
-          </li>
+
           {/* Mobile-Only Admin Portal Link inside hamburger drawer */}
           <li className="nav-admin-mobile-item">
             <a

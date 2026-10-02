@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { playChimeNote, chimeFrequencies } from '../utils/audio';
 
 export default function Footer({ onNavigate }) {
   const [email, setEmail] = useState('');
@@ -9,7 +8,6 @@ export default function Footer({ onNavigate }) {
     e.preventDefault();
     if (email) {
       setSubscribed(true);
-      playChimeNote(chimeFrequencies[4]);
       setTimeout(() => setSubscribed(false), 4000);
       setEmail('');
     }
@@ -27,7 +25,6 @@ export default function Footer({ onNavigate }) {
       top: 0,
       behavior: 'smooth'
     });
-    playChimeNote(chimeFrequencies[5]);
   };
 
   return (
@@ -85,11 +82,6 @@ export default function Footer({ onNavigate }) {
               <li><a href="#gallery" onClick={(e) => handleNavClick(e, 'home', 'gallery')}>Memory Wall</a></li>
               <li><a href="#sponsors" onClick={(e) => handleNavClick(e, 'home', 'sponsors')}>Our Sponsors</a></li>
               <li><a href="/team" onClick={(e) => handleNavClick(e, 'team')}>Organizing Team</a></li>
-              <li>
-                <a href="/merch" className="footer-merch-link" onClick={(e) => handleNavClick(e, 'merch')}>
-                  Official Merch 🌸
-                </a>
-              </li>
               <li>
                 <a href="/admin" className="footer-admin-link" onClick={(e) => handleNavClick(e, 'admin')}>
                   Admin Portal ⚙️

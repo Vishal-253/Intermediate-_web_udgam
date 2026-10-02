@@ -15,7 +15,7 @@ export default function AdminDashboard({
   onNavigateHome,
   onLogout
 }) {
-  const [activeTab, setActiveTab] = useState('merch'); // 'merch' | 'events'
+  const [activeTab, setActiveTab] = useState('events'); // 'events' | 'merch'
   const [toastMessage, setToastMessage] = useState('');
 
   // Search & Filters
