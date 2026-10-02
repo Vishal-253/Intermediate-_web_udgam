@@ -4,34 +4,56 @@ import CursorInsects from './components/CursorInsects';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import About from './components/About';
-import Events from './components/Events';
-import Schedule from './components/Schedule';
-import Gallery from './components/Gallery';
-import Sponsors from './components/Sponsors';
+import HomeGateways from './components/HomeGateways';
 import Team from './components/Team';
-import Footer from './components/Footer';
+import EventsPage from './components/EventsPage';
+import SchedulePage from './components/SchedulePage';
+import GalleryPage from './components/GalleryPage';
+import SponsorsPage from './components/SponsorsPage';
 import TeamPage from './components/TeamPage';
+import Footer from './components/Footer';
 import EventModal from './components/EventModal';
 import LightboxModal from './components/LightboxModal';
 import AdminLogin from './components/AdminLogin';
 import AdminDashboard from './components/AdminDashboard';
 import { getStoredMerch, getStoredEvents, checkAdminAuth } from './utils/festivalStore';
 
-export default function App() {
-  const [currentPage, setCurrentPage] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const path = window.location.pathname.toLowerCase();
-      const hash = window.location.hash.toLowerCase();
-      if (path.includes('/admin') || hash === '#admin' || hash === '#/admin') {
-        return 'admin';
-      }
-      if (path.includes('/team') || hash === '#team' || hash === '#/team') {
-        return 'team';
-      }
-    }
-    return 'home';
-  });
+const getInitialPage = () => {
+  if (typeof window !== 'undefined') {
+    const path = window.location.pathname.toLowerCase();
+    const hash = window.location.hash.toLowerCase();
 
+    if (path.includes('/admin') || hash === '#admin' || hash === '#/admin') return 'admin';
+    if (path.includes('/team') || hash === '#team' || hash === '#/team') return 'team';
+    if (path.includes('/events') || hash === '#events' || hash === '#/events') return 'events';
+    if (path.includes('/schedule') || hash === '#schedule' || hash === '#/schedule') return 'schedule';
+    if (path.includes('/gallery') || hash === '#gallery' || hash === '#/gallery') return 'gallery';
+    if (path.includes('/sponsors') || hash === '#sponsors' || hash === '#/sponsors') return 'sponsors';
+  }
+  return 'home';
+};
+
+const getPageTitle = (page) => {
+  switch (page) {
+    case 'admin':
+      return 'Control Portal | Udgam 2026 Admin — NIT Sikkim';
+    case 'team':
+      return 'Organizing Committee & Leads | Udgam 2026 — Chase the Bloom';
+    case 'events':
+      return 'Competitions & Arenas | Udgam 2026 — NIT Sikkim';
+    case 'schedule':
+      return 'Festival Itinerary & Schedule | Udgam 2026 — NIT Sikkim';
+    case 'gallery':
+      return 'Visual Chronicles & Memory Wall | Udgam 2026 — NIT Sikkim';
+    case 'sponsors':
+      return 'Patrons & Sponsors | Udgam 2026 — NIT Sikkim';
+    default:
+      return 'Udgam 2026 — Chase the Bloom | Annual Fest of NIT Sikkim';
+  }
+};
+
+export default function App() {
+  const [currentPage, setCurrentPage] = useState(getInitialPage);
   const [merchList, setMerchList] = useState(getStoredMerch);
   const [eventsList, setEventsList] = useState(getStoredEvents);
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(checkAdminAuth);
@@ -39,21 +61,12 @@ export default function App() {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
 
-  // Sync route with URL popstate / hashchange
+  // Sync route with browser history (back/forward) & hashchange
   useEffect(() => {
     const handleLocationChange = () => {
-      const path = window.location.pathname.toLowerCase();
-      const hash = window.location.hash.toLowerCase();
-      if (path.includes('/admin') || hash === '#admin' || hash === '#/admin') {
-        setCurrentPage('admin');
-        document.title = 'Control Portal | Udgam 2026 Admin — NIT Sikkim';
-      } else if (path.includes('/team') || hash === '#team' || hash === '#/team') {
-        setCurrentPage('team');
-        document.title = 'Organizing Committee & Leads | Udgam 2026 — Chase the Bloom';
-      } else {
-        setCurrentPage('home');
-        document.title = 'Udgam 2026 — Chase the Bloom | Annual Fest of NIT Sikkim';
-      }
+      const page = getInitialPage();
+      setCurrentPage(page);
+      document.title = getPageTitle(page);
     };
 
     window.addEventListener('popstate', handleLocationChange);
@@ -77,13 +90,7 @@ export default function App() {
 
   // Update document title on page change
   useEffect(() => {
-    if (currentPage === 'admin') {
-      document.title = 'Control Portal | Udgam 2026 Admin — NIT Sikkim';
-    } else if (currentPage === 'team') {
-      document.title = 'Organizing Committee & Leads | Udgam 2026 — Chase the Bloom';
-    } else {
-      document.title = 'Udgam 2026 — Chase the Bloom | Annual Fest of NIT Sikkim';
-    }
+    document.title = getPageTitle(currentPage);
   }, [currentPage]);
 
   // Scroll Reveal Observer for bloom animation on home sections
@@ -115,50 +122,34 @@ export default function App() {
 
   // Central page & section navigation handler
   const handleNavigate = (page, sectionId) => {
-    if (page === 'admin') {
-      setCurrentPage('admin');
-      try {
-        window.history.pushState({ page: 'admin' }, '', '/admin');
-      } catch (err) {
-        window.location.hash = '#admin';
-      }
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else if (page === 'team') {
-      setCurrentPage('team');
-      try {
-        window.history.pushState({ page: 'team' }, '', '/team');
-      } catch (err) {
-        window.location.hash = '#team';
-      }
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else {
-      const wasSubpage = currentPage === 'team' || currentPage === 'admin';
-      setCurrentPage('home');
-      try {
-        window.history.pushState({ page: 'home' }, '', '/');
-      } catch (err) {
-        window.location.hash = sectionId ? `#${sectionId}` : '';
-      }
+    const targetUrl = page === 'home' ? (sectionId ? `/#${sectionId}` : '/') : `/${page}`;
+    const wasDifferentPage = currentPage !== page;
 
-      if (sectionId) {
-        // If switching from subpage, delay slightly to allow DOM mount
-        const delay = wasSubpage ? 120 : 0;
-        setTimeout(() => {
-          const el = document.getElementById(sectionId);
-          if (el) {
-            el.scrollIntoView({ behavior: 'smooth' });
-          } else {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }
-        }, delay);
+    setCurrentPage(page);
+
+    try {
+      window.history.pushState({ page }, '', targetUrl);
+    } catch (err) {
+      if (page === 'home') {
+        window.location.hash = sectionId ? `#${sectionId}` : '';
       } else {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.location.hash = `#${page}`;
       }
     }
-  };
 
-  const handleScrollToTeam = () => {
-    handleNavigate('team');
+    if (page === 'home' && sectionId) {
+      const delay = wasDifferentPage ? 120 : 0;
+      setTimeout(() => {
+        const el = document.getElementById(sectionId);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth' });
+        } else {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      }, delay);
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   return (
@@ -198,37 +189,54 @@ export default function App() {
         ) : currentPage === 'team' ? (
           /* Dedicated Team & Committees Page */
           <TeamPage onNavigateHome={() => handleNavigate('home')} />
+        ) : currentPage === 'events' ? (
+          /* Dedicated Events & Competitions Page */
+          <EventsPage
+            events={eventsList}
+            onSelectEvent={(event) => setSelectedEvent(event)}
+            onNavigateHome={() => handleNavigate('home')}
+            onContactTeam={() => handleNavigate('team')}
+          />
+        ) : currentPage === 'schedule' ? (
+          /* Dedicated Festival Itinerary & Schedule Page */
+          <SchedulePage
+            onNavigateHome={() => handleNavigate('home')}
+            onExploreEvents={() => handleNavigate('events')}
+          />
+        ) : currentPage === 'gallery' ? (
+          /* Dedicated Memory Wall & Gallery Page */
+          <GalleryPage
+            onSelectImage={(img) => setSelectedImage(img)}
+            onNavigateHome={() => handleNavigate('home')}
+          />
+        ) : currentPage === 'sponsors' ? (
+          /* Dedicated Sponsors & Partners Page */
+          <SponsorsPage
+            onNavigateHome={() => handleNavigate('home')}
+            onContactTeam={() => handleNavigate('team')}
+          />
         ) : (
-          /* Main Festival Landing Page */
+          /* Simplified, Concise Main Festival Landing Page */
           <>
             {/* 1. Hero Section */}
-            <Hero onTeamClick={handleScrollToTeam} />
+            <Hero
+              onTeamClick={() => handleNavigate('team')}
+              onExploreEvents={() => handleNavigate('events')}
+            />
 
             {/* 2. About Section */}
             <About />
 
-            {/* 3. Events Section */}
-            <Events
-              events={eventsList}
-              onSelectEvent={(event) => setSelectedEvent(event)}
-            />
+            {/* 3. Festival Gateways Hub (Direct gateways to Events, Schedule, Gallery, Sponsors) */}
+            <HomeGateways onNavigate={handleNavigate} />
 
-            {/* 4. Schedule Section */}
-            <Schedule />
-
-            {/* 5. Gallery Section */}
-            <Gallery onSelectImage={(img) => setSelectedImage(img)} />
-
-            {/* 6. Sponsors Section */}
-            <Sponsors />
-
-            {/* 7. Organizing Committee Teaser Section */}
+            {/* 4. Organizing Committee Teaser Section */}
             <Team onExploreTeam={() => handleNavigate('team')} />
           </>
         )}
       </main>
 
-      {/* 8. Footer Section - Hidden on Admin Page */}
+      {/* Footer Section - Hidden on Admin Page */}
       {currentPage !== 'admin' && (
         <Footer onNavigate={handleNavigate} />
       )}
@@ -239,7 +247,7 @@ export default function App() {
         onClose={() => setSelectedEvent(null)}
         onContactTeam={() => {
           setSelectedEvent(null);
-          handleScrollToTeam();
+          handleNavigate('team');
         }}
       />
 

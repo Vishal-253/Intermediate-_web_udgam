@@ -75,12 +75,12 @@ export default function Footer({ onNavigate }) {
           <div className="footer-links-col">
             <h4 className="footer-col-title">Navigation</h4>
             <ul className="footer-link-list">
-              <li><a href="#hero" onClick={(e) => handleNavClick(e, 'home', 'hero')}>Home</a></li>
-              <li><a href="#about" onClick={(e) => handleNavClick(e, 'home', 'about')}>About Fest</a></li>
-              <li><a href="#events" onClick={(e) => handleNavClick(e, 'home', 'events')}>Competitions</a></li>
-              <li><a href="#schedule" onClick={(e) => handleNavClick(e, 'home', 'schedule')}>Day Itinerary</a></li>
-              <li><a href="#gallery" onClick={(e) => handleNavClick(e, 'home', 'gallery')}>Memory Wall</a></li>
-              <li><a href="#sponsors" onClick={(e) => handleNavClick(e, 'home', 'sponsors')}>Our Sponsors</a></li>
+              <li><a href="/" onClick={(e) => handleNavClick(e, 'home', 'hero')}>Home</a></li>
+              <li><a href="/#about" onClick={(e) => handleNavClick(e, 'home', 'about')}>About Fest</a></li>
+              <li><a href="/events" onClick={(e) => handleNavClick(e, 'events')}>Competitions</a></li>
+              <li><a href="/schedule" onClick={(e) => handleNavClick(e, 'schedule')}>Day Itinerary</a></li>
+              <li><a href="/gallery" onClick={(e) => handleNavClick(e, 'gallery')}>Memory Wall</a></li>
+              <li><a href="/sponsors" onClick={(e) => handleNavClick(e, 'sponsors')}>Our Sponsors</a></li>
               <li><a href="/team" onClick={(e) => handleNavClick(e, 'team')}>Organizing Team</a></li>
               <li>
                 <a href="/admin" className="footer-admin-link" onClick={(e) => handleNavClick(e, 'admin')}>

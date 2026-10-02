@@ -25,7 +25,7 @@ const calculateTimeLeft = () => {
   };
 };
 
-export default function Hero({ onTeamClick }) {
+export default function Hero({ onTeamClick, onExploreEvents }) {
   // Dynamic Live Countdown to November 6, 2026
   const [timeLeft, setTimeLeft] = useState(calculateTimeLeft);
   const [birds, setBirds] = useState([0, 1, 2]);
@@ -151,7 +151,16 @@ export default function Hero({ onTeamClick }) {
                 <path d="M4 10h12M11 5l5 5-5 5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </a>
-            <a href="#events" className="btn btn-outline">
+            <a
+              href="/events"
+              className="btn btn-outline"
+              onClick={(e) => {
+                if (onExploreEvents) {
+                  e.preventDefault();
+                  onExploreEvents();
+                }
+              }}
+            >
               <span>Explore Events</span>
             </a>
           </div>

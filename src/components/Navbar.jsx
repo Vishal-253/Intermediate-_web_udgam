@@ -1,17 +1,13 @@
 import React, { useState, useEffect } from 'react';
 
-export default function Navbar({ onClaimPassClick, currentPage = 'home', onNavigate }) {
+export default function Navbar({ currentPage = 'home', onNavigate }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('hero');
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
-    if (currentPage === 'team') {
-      setActiveSection('team');
-      return;
-    }
-    if (currentPage === 'admin') {
-      setActiveSection('admin');
+    if (currentPage !== 'home') {
+      setActiveSection(currentPage);
       return;
     }
 
@@ -41,12 +37,14 @@ export default function Navbar({ onClaimPassClick, currentPage = 'home', onNavig
     }
   };
 
+  const isSubpage = currentPage !== 'home';
+
   return (
-    <header className={`navbar-transparent-header ${isScrolled || currentPage === 'team' || currentPage === 'admin' ? 'scrolled' : ''}`} id="main-header">
+    <header className={`navbar-transparent-header ${isScrolled || isSubpage ? 'scrolled' : ''}`} id="main-header">
       <div className="nav-container-fluid">
         {/* Left: Clean, elegant typographic logo */}
         <a
-          href="#hero"
+          href="/"
           className="nav-brand-clean"
           onClick={(e) => handleLinkClick(e, 'home', 'hero')}
         >
@@ -57,8 +55,8 @@ export default function Navbar({ onClaimPassClick, currentPage = 'home', onNavig
         <ul className={`nav-center-links ${isMenuOpen ? 'open' : ''}`} id="nav-links">
           <li>
             <a
-              href="#hero"
-              className={`nav-text-link ${currentPage === 'home' && activeSection === 'hero' ? 'active' : ''}`}
+              href="/"
+              className={`nav-text-link ${currentPage === 'home' && (activeSection === 'hero' || activeSection === 'gateways') ? 'active' : ''}`}
               onClick={(e) => handleLinkClick(e, 'home', 'hero')}
             >
               Home
@@ -66,7 +64,7 @@ export default function Navbar({ onClaimPassClick, currentPage = 'home', onNavig
           </li>
           <li>
             <a
-              href="#about"
+              href="/#about"
               className={`nav-text-link ${currentPage === 'home' && activeSection === 'about' ? 'active' : ''}`}
               onClick={(e) => handleLinkClick(e, 'home', 'about')}
             >
@@ -75,36 +73,36 @@ export default function Navbar({ onClaimPassClick, currentPage = 'home', onNavig
           </li>
           <li>
             <a
-              href="#events"
-              className={`nav-text-link ${currentPage === 'home' && activeSection === 'events' ? 'active' : ''}`}
-              onClick={(e) => handleLinkClick(e, 'home', 'events')}
+              href="/events"
+              className={`nav-text-link ${currentPage === 'events' ? 'active' : ''}`}
+              onClick={(e) => handleLinkClick(e, 'events')}
             >
               Events
             </a>
           </li>
           <li>
             <a
-              href="#schedule"
-              className={`nav-text-link ${currentPage === 'home' && activeSection === 'schedule' ? 'active' : ''}`}
-              onClick={(e) => handleLinkClick(e, 'home', 'schedule')}
+              href="/schedule"
+              className={`nav-text-link ${currentPage === 'schedule' ? 'active' : ''}`}
+              onClick={(e) => handleLinkClick(e, 'schedule')}
             >
               Schedule
             </a>
           </li>
           <li>
             <a
-              href="#gallery"
-              className={`nav-text-link ${currentPage === 'home' && activeSection === 'gallery' ? 'active' : ''}`}
-              onClick={(e) => handleLinkClick(e, 'home', 'gallery')}
+              href="/gallery"
+              className={`nav-text-link ${currentPage === 'gallery' ? 'active' : ''}`}
+              onClick={(e) => handleLinkClick(e, 'gallery')}
             >
               Gallery
             </a>
           </li>
           <li>
             <a
-              href="#sponsors"
-              className={`nav-text-link ${currentPage === 'home' && activeSection === 'sponsors' ? 'active' : ''}`}
-              onClick={(e) => handleLinkClick(e, 'home', 'sponsors')}
+              href="/sponsors"
+              className={`nav-text-link ${currentPage === 'sponsors' ? 'active' : ''}`}
+              onClick={(e) => handleLinkClick(e, 'sponsors')}
             >
               Sponsors
             </a>
@@ -139,11 +137,8 @@ export default function Navbar({ onClaimPassClick, currentPage = 'home', onNavig
             aria-label="Search Events"
             title="Explore & Search Events"
             onClick={(e) => {
-              if (currentPage !== 'home' && onNavigate) {
-                onNavigate('home', 'events');
-              } else {
-                const el = document.getElementById('events');
-                if (el) el.scrollIntoView({ behavior: 'smooth' });
+              if (onNavigate) {
+                onNavigate('events');
               }
             }}
           >
@@ -153,7 +148,7 @@ export default function Navbar({ onClaimPassClick, currentPage = 'home', onNavig
             </svg>
           </button>
 
-          {/* Desktop Admin Portal Button: Replaces the hamburger on desktop viewports */}
+          {/* Desktop Admin Portal Button */}
           <button
             type="button"
             className={`nav-admin-btn ${currentPage === 'admin' ? 'active' : ''}`}
