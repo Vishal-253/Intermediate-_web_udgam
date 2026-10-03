@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import PetalCanvas from './components/PetalCanvas';
 import CursorInsects from './components/CursorInsects';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
@@ -154,9 +153,6 @@ export default function App() {
 
   return (
     <div className="udgam-app">
-      {/* Fullpage Falling Petals Canvas */}
-      <PetalCanvas />
-
       {/* Bioluminescent Cursor-Following Butterfly & Bee */}
       <CursorInsects />
 

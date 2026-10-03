@@ -1,5 +1,6 @@
 import React from 'react';
 import { teamMembers } from '../data/teamData';
+import TeamPassCard from './TeamPassCard';
 
 export default function Team({ onExploreTeam }) {
   // Preview top 4 executive conveners on the landing page
@@ -24,45 +25,10 @@ export default function Team({ onExploreTeam }) {
           </p>
         </div>
 
-        {/* Executive Showcase Row (Preview of 4 leaders) */}
-        <div className="team-grid team-preview-grid">
+        {/* Executive Showcase Row (Preview of 4 leaders matching pass design) */}
+        <div className="team-passes-grid team-preview-grid">
           {previewMembers.map((member) => (
-            <article key={member.id} className="team-card card-bloom" id={`member-preview-${member.id}`}>
-              <div className="team-avatar-wrapper">
-                <div className="team-avatar-halo"></div>
-                <div
-                  className="team-avatar-circle"
-                  style={{ background: member.avatarGradient }}
-                >
-                  <div className="avatar-placeholder-art">
-                    <svg
-                      viewBox="0 0 64 64"
-                      width="52"
-                      height="52"
-                      fill="none"
-                      className="avatar-user-silhouette"
-                    >
-                      <circle cx="32" cy="22" r="12" fill="rgba(255, 255, 255, 0.88)" />
-                      <path
-                        d="M12 54 C12 40, 20 36, 32 36 C44 36, 52 40, 52 54 Z"
-                        fill="rgba(255, 255, 255, 0.88)"
-                      />
-                    </svg>
-                    <span className="avatar-initials-tag">{member.initials}</span>
-                  </div>
-                </div>
-
-                <div className={`team-role-pill badge-${member.badgeType}`}>
-                  {member.badgeText}
-                </div>
-              </div>
-
-              <div className="team-card-info">
-                <h3 className="team-member-name">{member.name}</h3>
-                <p className="team-member-role">{member.role}</p>
-                <p className="team-member-dept">{member.department}</p>
-              </div>
-            </article>
+            <TeamPassCard key={member.id} member={member} />
           ))}
         </div>
 
