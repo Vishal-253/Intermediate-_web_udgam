@@ -8207,3 +8207,71 @@ button {
 @media (prefers-reduced-motion: reduce) {
   .tilt-prompt { animation: none; }
 }
+
+/* Hall of fame on touch devices: normal page scroll, horizontal swipe carousel */
+.hof-mode-swipe .hof-sticky {
+  position: static;
+  height: auto;
+  display: block;
+}
+
+.hof-mode-swipe .hof-gallery {
+  padding: 16px 0 20px;
+}
+
+.hof-mode-swipe .hof-track {
+  gap: 28px;
+  /* side padding lets the first and last deck snap to the centre */
+  padding: 24px calc(50% - 126px) 32px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: calc(50% - 126px);
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.hof-mode-swipe .hof-track::-webkit-scrollbar {
+  display: none;
+}
+
+.hof-mode-swipe .hof-item {
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+}
+
+.hof-swipe-hint {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: -8px;
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  color: var(--muted-foreground, #8a7a80);
+}
+
+.hof-swipe-cue {
+  /* sits beside the centred counter without pushing it off-centre */
+  position: absolute;
+  right: calc(50% + 34px);
+  white-space: nowrap;
+  transition: opacity 0.5s ease;
+}
+
+.hof-swipe-cue.is-faded {
+  opacity: 0;
+}
+
+.hof-swipe-arrow {
+  color: var(--blossom-deep, #b4505c);
+  font-size: 1rem;
+}
+
+.hof-swipe-count {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--secondary-foreground, #6b4a55);
+}
