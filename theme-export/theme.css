@@ -1,0 +1,124 @@
+/* ==========================================================================
+   Udgam "Cherry Blossom" theme — Tailwind CSS v4 + shadcn/ui
+   Extracted from main_udgam_web/frontend/src/styles.css
+
+   Requires:  npm i tailwindcss @tailwindcss/vite tw-animate-css
+   Fonts:     add to <head> (or see README for next/font):
+     <link rel="preconnect" href="https://fonts.googleapis.com">
+     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;1,400&family=Quicksand:wght@400;600;700&display=swap">
+   ========================================================================== */
+
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  /* Radius scale (base 1.25rem) */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+
+  /* Typography → font-display / font-sans */
+  --font-display: "Fraunces", Georgia, serif;
+  --font-sans: "Quicksand", system-ui, sans-serif;
+
+  /* shadcn semantic colors */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Brand colors → bg-blossom, text-blossom-deep, bg-leaf, bg-glass … */
+  --color-blossom: var(--blossom);
+  --color-blossom-deep: var(--blossom-deep);
+  --color-leaf: var(--leaf);
+  --color-glass: var(--glass);
+}
+
+:root {
+  --radius: 1.25rem;
+
+  --background: oklch(0.975 0.015 350);
+  --foreground: oklch(0.3 0.06 350);
+  --card: oklch(1 0 0 / 0.6);
+  --card-foreground: oklch(0.3 0.06 350);
+  --popover: oklch(0.99 0.01 350);
+  --popover-foreground: oklch(0.3 0.06 350);
+  --primary: oklch(0.62 0.17 355);
+  --primary-foreground: oklch(0.99 0.01 350);
+  --secondary: oklch(0.93 0.04 350);
+  --secondary-foreground: oklch(0.35 0.08 350);
+  --muted: oklch(0.94 0.02 350);
+  --muted-foreground: oklch(0.5 0.05 350);
+  --accent: oklch(0.88 0.08 140);
+  --accent-foreground: oklch(0.3 0.06 150);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.98 0 0);
+  --border: oklch(0.88 0.05 350 / 0.6);
+  --input: oklch(0.9 0.04 350);
+  --ring: oklch(0.7 0.14 355);
+
+  --blossom: oklch(0.85 0.09 355);
+  --blossom-deep: oklch(0.55 0.19 358);
+  --leaf: oklch(0.75 0.1 140);
+  --glass: oklch(1 0 0 / 0.45);
+
+  --gradient-blossom: linear-gradient(135deg, var(--blossom-deep), oklch(0.75 0.14 20));
+  --gradient-sky: linear-gradient(180deg, oklch(0.95 0.04 350), oklch(0.97 0.03 60));
+  --shadow-glow: 0 10px 40px -10px color-mix(in oklab, var(--blossom-deep) 55%, transparent);
+}
+
+/* NOTE: the source project defines no .dark palette — the `dark:` variant
+   exists but has no values. Add a `.dark { … }` block here if you need one. */
+
+@layer base {
+  * { border-color: var(--color-border); }
+  body {
+    background: var(--gradient-sky);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    min-height: 100vh;
+  }
+  h1, h2, h3 { font-family: var(--font-display); }
+}
+
+/* Frosted-glass panel:  <div class="glass rounded-3xl p-6"> */
+@utility glass {
+  background: var(--glass);
+  backdrop-filter: blur(14px) saturate(1.3);
+  border: 1px solid oklch(1 0 0 / 0.6);
+  box-shadow: var(--shadow-glow);
+}
+
+/* Pink→coral gradient text:  <h1 class="text-gradient font-display"> */
+@utility text-gradient {
+  background: var(--gradient-blossom);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Gradient CTA button:  <button class="btn-blossom rounded-full px-6 py-3"> */
+@utility btn-blossom {
+  background: var(--gradient-blossom);
+  color: var(--primary-foreground);
+  box-shadow: var(--shadow-glow);
+}

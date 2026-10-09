@@ -1,0 +1,693 @@
+/* ==========================================================================
+   UDGAM "CHERRY BLOSSOM" THEME
+   Ported from theme-export/theme.css (Tailwind v4 + shadcn tokens) to plain CSS.
+   Loaded after index.css: re-points the legacy dark tokens at the light palette
+   and overrides the surfaces that hard-code dark colours.
+   ========================================================================== */
+
+:root {
+  /* --- theme-export tokens (verbatim) --- */
+  --radius: 1.25rem;
+  --background: oklch(0.975 0.015 350);
+  --foreground: oklch(0.3 0.06 350);
+  --card: oklch(1 0 0 / 0.6);
+  --card-foreground: oklch(0.3 0.06 350);
+  --popover: oklch(0.99 0.01 350);
+  --popover-foreground: oklch(0.3 0.06 350);
+  --primary: oklch(0.62 0.17 355);
+  --primary-foreground: oklch(0.99 0.01 350);
+  --secondary: oklch(0.93 0.04 350);
+  --secondary-foreground: oklch(0.35 0.08 350);
+  --muted: oklch(0.94 0.02 350);
+  --muted-foreground: oklch(0.5 0.05 350);
+  --accent: oklch(0.88 0.08 140);
+  --accent-foreground: oklch(0.3 0.06 150);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.88 0.05 350 / 0.6);
+  --input: oklch(0.9 0.04 350);
+  --ring: oklch(0.7 0.14 355);
+  --blossom: oklch(0.85 0.09 355);
+  --blossom-deep: oklch(0.55 0.19 358);
+  --leaf: oklch(0.75 0.1 140);
+  --glass: oklch(1 0 0 / 0.45);
+  --gradient-blossom: linear-gradient(135deg, var(--blossom-deep), oklch(0.75 0.14 20));
+  --gradient-sky: linear-gradient(180deg, oklch(0.95 0.04 350), oklch(0.97 0.03 60));
+  --shadow-glow: 0 10px 40px -10px color-mix(in oklab, var(--blossom-deep) 55%, transparent);
+  --font-display: "Fraunces", Georgia, serif;
+
+  /* --- legacy tokens re-pointed at the theme --- */
+  --bg-dark-base: var(--background);
+  --bg-dark-alt: var(--muted);
+  --bg-dark-card: var(--card);
+  --bg-dark-card-hover: oklch(1 0 0 / 0.8);
+  --bg-frosted: oklch(1 0 0 / 0.75);
+  --bg-frosted-border: var(--border);
+
+  --blush-glow: color-mix(in oklab, var(--blossom-deep) 40%, transparent);
+  --blush-light: var(--secondary);
+  --blush-primary: var(--primary);
+  --blush-vivid: var(--blossom-deep);
+  --blush-deep: var(--blossom-deep);
+
+  --text-primary: var(--foreground);
+  --text-heading: var(--foreground);
+  --text-secondary: oklch(0.42 0.06 350);
+  --text-muted: var(--muted-foreground);
+  --text-dim: oklch(0.6 0.04 350);
+
+  --sage-primary: var(--accent-foreground);
+  --sage-glow: color-mix(in oklab, var(--leaf) 35%, transparent);
+  --sage-dark: var(--leaf);
+  --sage-badge-bg: color-mix(in oklab, var(--accent) 55%, transparent);
+
+  /* the old gold accents become the deep rose */
+  --gold-primary: var(--blossom-deep);
+  --gold-vivid: var(--primary);
+  --gold-glow: var(--blush-glow);
+  --gold-badge-bg: var(--secondary);
+
+  --font-serif: var(--font-display);
+  --font-sans: "Quicksand", system-ui, sans-serif;
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 8px);
+
+  --shadow-sm: 0 4px 18px -8px color-mix(in oklab, var(--foreground) 25%, transparent);
+  --shadow-bloom: var(--shadow-glow);
+  --shadow-hover: 0 18px 48px -12px color-mix(in oklab, var(--blossom-deep) 60%, transparent);
+  --shadow-gold: var(--shadow-glow);
+  --border-soft: 1px solid var(--border);
+  --border-gold: 1px solid var(--border);
+  --border-glow: 1px solid var(--ring);
+}
+
+/* ---------- Base ---------- */
+html {
+  background-color: var(--background);
+}
+
+body {
+  background: var(--gradient-sky);
+  background-attachment: fixed;
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+body::before {
+  opacity: 0.025;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+}
+
+::selection {
+  background-color: var(--blossom);
+  color: var(--foreground);
+}
+
+/* Reusable theme utilities (same names as the export) */
+.glass {
+  background: var(--glass);
+  backdrop-filter: blur(14px) saturate(1.3);
+  -webkit-backdrop-filter: blur(14px) saturate(1.3);
+  border: 1px solid oklch(1 0 0 / 0.6);
+  box-shadow: var(--shadow-glow);
+}
+
+.text-gradient,
+.text-glow-blush {
+  background: var(--gradient-blossom);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: none;
+}
+
+/* Cursor insects: softer glow on a light page */
+.butterfly-svg {
+  filter: drop-shadow(0 0 6px color-mix(in oklab, var(--primary) 60%, transparent));
+}
+.bee-svg {
+  filter: drop-shadow(0 0 6px oklch(0.8 0.12 70 / 0.7));
+}
+
+/* ---------- Navbar ---------- */
+.navbar-transparent-header.scrolled {
+  background: oklch(1 0 0 / 0.7);
+  backdrop-filter: blur(14px) saturate(1.3);
+  -webkit-backdrop-filter: blur(14px) saturate(1.3);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 4px 24px -12px color-mix(in oklab, var(--blossom-deep) 45%, transparent);
+}
+
+.brand-wordmark {
+  color: var(--blossom-deep);
+  text-shadow: none;
+}
+.nav-brand-clean:hover .brand-wordmark {
+  color: var(--primary);
+  text-shadow: none;
+}
+
+.nav-text-link,
+.nav-icon-btn {
+  color: var(--secondary-foreground);
+}
+.nav-text-link:hover,
+.nav-text-link.active,
+.nav-icon-btn:hover {
+  color: var(--blossom-deep);
+  filter: none;
+}
+.nav-text-link::after {
+  background: var(--gradient-blossom);
+  box-shadow: none;
+}
+
+.nav-hamburger-minimal span {
+  background: var(--foreground);
+}
+.nav-hamburger-minimal:hover span {
+  background: var(--blossom-deep);
+  box-shadow: none;
+}
+
+@media (max-width: 768px) {
+  .nav-center-links {
+    background: oklch(1 0 0 / 0.95);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-glow);
+  }
+}
+
+/* ---------- Buttons ---------- */
+.btn-primary,
+.btn-bloom.btn-primary {
+  background: var(--gradient-blossom);
+  color: var(--primary-foreground);
+  box-shadow: var(--shadow-glow);
+}
+.btn-bloom:hover {
+  color: var(--primary-foreground);
+  box-shadow: var(--shadow-hover);
+}
+
+.btn-outline {
+  background: var(--glass);
+  border: 1.5px solid var(--ring);
+  color: var(--blossom-deep);
+  box-shadow: none;
+  text-shadow: none;
+}
+.btn-outline:hover {
+  background: var(--secondary);
+  border-color: var(--blossom-deep);
+  color: var(--blossom-deep);
+  box-shadow: var(--shadow-glow);
+}
+
+/* ---------- Cards & sections ---------- */
+.card-bloom {
+  background: var(--card);
+  backdrop-filter: blur(14px) saturate(1.3);
+  -webkit-backdrop-filter: blur(14px) saturate(1.3);
+  border: 1px solid oklch(1 0 0 / 0.7);
+  box-shadow: var(--shadow-glow);
+}
+.card-bloom:hover {
+  background: var(--bg-dark-card-hover);
+  border-color: var(--blossom);
+  box-shadow: var(--shadow-hover);
+}
+
+.section-tag {
+  color: var(--blossom-deep);
+  text-shadow: none;
+}
+.section-title {
+  color: var(--foreground);
+  text-shadow: none;
+}
+
+.events-section {
+  background: transparent;
+}
+
+/* ---------- Events page ---------- */
+.subpage-root {
+  background:
+    radial-gradient(circle at 50% 0%, color-mix(in oklab, var(--blossom) 45%, transparent) 0%, transparent 55%),
+    radial-gradient(circle at 92% 45%, oklch(0.93 0.06 60 / 0.5) 0%, transparent 45%);
+}
+.subpage-hero-bg-glow {
+  background: radial-gradient(ellipse, color-mix(in oklab, var(--blossom) 55%, transparent), transparent 70%);
+}
+
+.fest-pill-badge {
+  background: var(--secondary);
+  border: 1px solid var(--border);
+  color: var(--secondary-foreground);
+  box-shadow: none;
+}
+
+.subpage-metric-card {
+  background: var(--glass);
+  backdrop-filter: blur(14px) saturate(1.3);
+  -webkit-backdrop-filter: blur(14px) saturate(1.3);
+  border: 1px solid oklch(1 0 0 / 0.7);
+  box-shadow: var(--shadow-glow);
+}
+
+.events-search-input {
+  background: oklch(1 0 0 / 0.75);
+  border: 1px solid var(--input);
+  color: var(--foreground);
+}
+.events-search-input::placeholder {
+  color: var(--muted-foreground);
+}
+.events-search-input:focus {
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 25%, transparent);
+}
+.search-clear-btn:hover {
+  color: var(--blossom-deep);
+}
+
+.events-count-pill {
+  background: var(--glass);
+  border: 1px solid var(--border);
+}
+.events-count-pill strong {
+  color: var(--blossom-deep);
+}
+
+.filter-tab {
+  background: var(--glass);
+  border: 1px solid var(--border);
+  color: var(--secondary-foreground);
+}
+.filter-tab:hover {
+  border-color: var(--ring);
+  color: var(--blossom-deep);
+  box-shadow: var(--shadow-glow);
+}
+.filter-tab.active {
+  background: var(--gradient-blossom);
+  border-color: transparent;
+  color: var(--primary-foreground);
+  box-shadow: var(--shadow-glow);
+}
+
+.event-cat-badge {
+  background: var(--sage-badge-bg);
+  color: var(--accent-foreground);
+  border: 1px solid color-mix(in oklab, var(--leaf) 50%, transparent);
+}
+.event-prize-badge {
+  background: var(--secondary);
+  color: var(--blossom-deep);
+  border: 1px solid var(--border);
+}
+.event-title {
+  color: var(--foreground);
+}
+.event-meta-row {
+  border-top: 1px dashed var(--border);
+}
+.meta-teamsize {
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+  border: 1px solid var(--border);
+}
+
+.btn-event-detail {
+  background: oklch(1 0 0 / 0.7);
+  color: var(--blossom-deep);
+  border: 1px solid var(--border);
+}
+.btn-event-detail:hover {
+  background: var(--gradient-blossom);
+  border-color: transparent;
+  color: var(--primary-foreground);
+  box-shadow: var(--shadow-glow);
+}
+
+.subpage-callout-banner {
+  background:
+    radial-gradient(ellipse at 85% 50%, color-mix(in oklab, var(--blossom) 50%, transparent) 0%, transparent 70%),
+    var(--glass);
+  backdrop-filter: blur(14px) saturate(1.3);
+  -webkit-backdrop-filter: blur(14px) saturate(1.3);
+  border: 1px solid oklch(1 0 0 / 0.7);
+  box-shadow: var(--shadow-glow);
+}
+.callout-badge {
+  color: var(--blossom-deep);
+}
+
+/* ---------- Event modal ---------- */
+.modal-backdrop {
+  background: color-mix(in oklab, var(--foreground) 35%, transparent);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.modal-dialog {
+  background: var(--popover);
+  border: 1px solid var(--border);
+  box-shadow: 0 30px 80px -20px color-mix(in oklab, var(--blossom-deep) 55%, transparent);
+  color: var(--popover-foreground);
+}
+.modal-close-btn {
+  background: var(--secondary);
+  border: 1px solid var(--border);
+  color: var(--secondary-foreground);
+}
+.modal-close-btn:hover {
+  background: var(--gradient-blossom);
+  color: var(--primary-foreground);
+}
+.modal-event-tag {
+  color: var(--accent-foreground);
+}
+.modal-event-title,
+.modal-rules-title {
+  color: var(--foreground);
+}
+.modal-details-grid {
+  background: var(--muted);
+  border: 1px solid var(--border);
+}
+.modal-detail-box strong {
+  color: var(--blossom-deep);
+}
+
+/* ---------- Footer ---------- */
+.footer-section {
+  background: linear-gradient(180deg, oklch(0.95 0.035 350), oklch(0.93 0.045 355));
+  color: var(--foreground);
+  border-top: 1px solid var(--border);
+}
+.footer-section::before {
+  background:
+    radial-gradient(circle at 10% 20%, color-mix(in oklab, var(--blossom) 35%, transparent) 0%, transparent 40%),
+    radial-gradient(circle at 80% 80%, oklch(0.93 0.06 60 / 0.5) 0%, transparent 40%);
+}
+.footer-flower {
+  filter: none;
+}
+.footer-title {
+  color: var(--foreground);
+}
+.footer-motto-tag {
+  color: var(--blossom-deep);
+  filter: none;
+}
+.footer-col-title {
+  color: var(--blossom-deep);
+}
+.footer-bio,
+.footer-link-list a,
+.footer-contact-item,
+.newsletter-desc {
+  color: var(--secondary-foreground);
+}
+.footer-link-list a:hover {
+  color: var(--blossom-deep);
+}
+.social-icon-btn,
+.back-to-top-btn {
+  background: var(--glass);
+  border: 1px solid var(--border);
+  color: var(--secondary-foreground);
+}
+.social-icon-btn:hover,
+.back-to-top-btn:hover {
+  background: var(--gradient-blossom);
+  color: var(--primary-foreground);
+  box-shadow: var(--shadow-glow);
+}
+.newsletter-input {
+  background: oklch(1 0 0 / 0.75);
+  border: 1px solid var(--input);
+  color: var(--foreground);
+}
+.newsletter-input::placeholder {
+  color: var(--muted-foreground);
+}
+.newsletter-input:focus {
+  background: oklch(1 0 0 / 0.95);
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 25%, transparent);
+}
+.newsletter-btn {
+  background: var(--gradient-blossom);
+  color: var(--primary-foreground);
+}
+.newsletter-btn:hover {
+  background: var(--gradient-blossom);
+  box-shadow: var(--shadow-glow);
+}
+.footer-bottom-row {
+  border-top: 1px solid var(--border);
+}
+.copyright-text {
+  color: var(--muted-foreground);
+}
+.tagline-soft {
+  color: var(--blossom-deep);
+}
+
+/* ---------- Team page ---------- */
+.team-page-root {
+  background:
+    radial-gradient(ellipse 1100px 560px at 50% 0%, color-mix(in oklab, var(--blossom) 45%, transparent) 0%, transparent 70%),
+    transparent;
+  color: var(--foreground);
+}
+.team-ambient-glow {
+  background: radial-gradient(ellipse at center, color-mix(in oklab, var(--blossom) 40%, transparent) 0%, transparent 70%);
+}
+
+.leadership-role-title {
+  color: var(--blossom-deep);
+  text-shadow: none;
+}
+.leadership-role-title::before,
+.organising-committee-title::before {
+  background: linear-gradient(90deg, transparent, var(--ring));
+}
+.leadership-role-title::after,
+.organising-committee-title::after {
+  background: linear-gradient(90deg, var(--ring), transparent);
+}
+.organising-committee-title {
+  background: var(--gradient-blossom);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Member card: themed to the palette, layout unchanged */
+.team-pass-card-wrapper {
+  --behind-glow-color: color-mix(in oklab, var(--blossom) 70%, transparent);
+}
+.tc-card {
+  background: oklch(0.995 0.005 350);
+  border: 1px solid var(--border);
+  color: var(--foreground);
+  box-shadow: color-mix(in oklab, var(--blossom-deep) 30%, transparent)
+    calc((var(--pointer-from-left, 0.5) * 10px) - 5px)
+    calc((var(--pointer-from-top, 0.5) * 16px) - 8px) 30px -8px;
+}
+.tc-crew,
+.tc-name {
+  color: var(--foreground);
+}
+.tc-role {
+  color: var(--blossom-deep);
+}
+.tc-avatar-ring {
+  border-color: var(--border);
+}
+.tc-avatar {
+  background: var(--muted);
+}
+.tc-pill {
+  border-color: var(--input);
+  color: var(--foreground);
+}
+.tc-pill:hover,
+.tc-pill.copied {
+  border-color: var(--ring);
+}
+.tc-pill.copied {
+  background: var(--secondary);
+}
+.tc-pill-icon {
+  background: var(--gradient-blossom);
+  color: var(--primary-foreground);
+}
+.tc-pill-copy {
+  color: var(--secondary-foreground);
+}
+.tc-pill.copied .tc-pill-copy {
+  color: var(--blossom-deep);
+}
+
+/* Conveners / Gen Sec decks (pass-style covers) */
+.deck-card-layer {
+  background: linear-gradient(180deg, oklch(0.99 0.01 350), oklch(0.95 0.03 350));
+  border: 1px solid var(--border);
+  box-shadow: 0 10px 24px -10px color-mix(in oklab, var(--blossom-deep) 45%, transparent);
+}
+.team-deck-stack:hover .deck-card-layer.layer-back,
+.team-deck-stack:hover .deck-card-layer.layer-mid {
+  box-shadow: 0 14px 30px -10px color-mix(in oklab, var(--blossom-deep) 55%, transparent);
+}
+.deck-layer-slot,
+.team-pass-slot {
+  background: var(--muted);
+  border: 1px solid var(--border);
+  box-shadow: inset 0 1px 2px color-mix(in oklab, var(--foreground) 20%, transparent);
+}
+.deck-layer-border-lines {
+  border-color: var(--border);
+}
+.deck-behind-glow {
+  background: radial-gradient(circle at 50% 50%, color-mix(in oklab, var(--blossom) 60%, transparent) 0%, transparent 68%);
+}
+
+.team-pass-card.deck-cover-card-inner {
+  background: linear-gradient(180deg, oklch(1 0 0), oklch(0.97 0.02 350));
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-glow);
+}
+.team-deck-stack:hover .deck-cover-card-inner {
+  border-color: var(--ring);
+  box-shadow: var(--shadow-hover);
+}
+.team-deck-container.deck-active-open .deck-cover-card-inner {
+  border-color: var(--blossom-deep);
+  box-shadow: 0 0 0 2px var(--ring), var(--shadow-hover);
+}
+.team-deck-stack:focus-visible {
+  outline: 2px solid var(--ring);
+}
+.team-pass-crew-tag {
+  color: var(--muted-foreground);
+}
+.deck-emblem-ring {
+  background: var(--gradient-blossom);
+  box-shadow: var(--shadow-glow);
+}
+.deck-emblem-inner {
+  background: oklch(1 0 0);
+}
+.deck-emblem-icon {
+  filter: none;
+}
+.deck-cover-title,
+.team-pass-name {
+  color: var(--foreground);
+  font-family: var(--font-display);
+  font-weight: 600;
+}
+.deck-role-ribbon {
+  background: var(--gradient-blossom);
+  color: var(--primary-foreground);
+  box-shadow: none;
+}
+.deck-open-hint {
+  background: var(--secondary);
+  border: 1px solid var(--border);
+  color: var(--blossom-deep);
+}
+.team-deck-stack:hover .deck-open-hint {
+  background: var(--blossom);
+  border-color: var(--ring);
+  box-shadow: none;
+}
+.team-pass-perf-line {
+  border-top-color: var(--border);
+}
+.team-pass-notch {
+  background: var(--background);
+  box-shadow: inset 0 0 3px color-mix(in oklab, var(--foreground) 20%, transparent);
+}
+.team-pass-notch.notch-left,
+.team-pass-notch.notch-right {
+  border-color: var(--border);
+}
+.deck-stack-count-badge,
+.team-pass-barcode-wrapper {
+  color: var(--muted-foreground);
+}
+.deck-cards-icon {
+  color: var(--blossom-deep);
+}
+
+/* Committee artwork decks (art has transparent rounded corners) */
+.deck-cover-image {
+  border-radius: 14px;
+  box-shadow: var(--shadow-glow);
+}
+.team-deck-stack:hover .deck-cover-image {
+  box-shadow: var(--shadow-hover);
+}
+.team-deck-container.deck-active-open .deck-cover-image {
+  box-shadow: 0 0 0 2px var(--ring), var(--shadow-hover);
+}
+
+/* Hall-of-fame wall: blush gallery instead of a dark corridor */
+.hof-wall-far {
+  background:
+    repeating-linear-gradient(90deg, color-mix(in oklab, var(--blossom-deep) 12%, transparent) 0 2px, transparent 2px 420px),
+    repeating-linear-gradient(90deg, oklch(1 0 0 / 0.35) 0 150px, transparent 150px 420px);
+}
+.hof-wall-mid {
+  background:
+    repeating-linear-gradient(90deg, color-mix(in oklab, var(--blossom-deep) 18%, transparent) 0 1px, transparent 1px 300px),
+    repeating-linear-gradient(90deg, transparent 0 60px, color-mix(in oklab, var(--blossom) 22%, transparent) 60px 240px, transparent 240px 300px);
+}
+.hof-rail {
+  background: linear-gradient(90deg, transparent, var(--ring), transparent);
+}
+.hof-floor {
+  background:
+    repeating-linear-gradient(90deg, color-mix(in oklab, var(--blossom-deep) 12%, transparent) 0 1px, transparent 1px 160px),
+    linear-gradient(180deg, color-mix(in oklab, var(--blossom) 30%, transparent), color-mix(in oklab, var(--blossom) 55%, transparent));
+  border-top: 1px solid var(--border);
+}
+
+/* Deal overlay: page underneath turns into frosted blush glass */
+.deck-page-overlay-root {
+  background: color-mix(in oklab, var(--background) 55%, transparent);
+  backdrop-filter: blur(10px) saturate(1.2);
+  -webkit-backdrop-filter: blur(10px) saturate(1.2);
+}
+.team-page-has-deck-overlay .team-hierarchical-layout {
+  opacity: 0.55;
+  filter: blur(3px);
+}
+.deck-overlay-ambient-halo {
+  background: radial-gradient(ellipse at 50% 35%, color-mix(in oklab, var(--blossom) 50%, transparent) 0%, transparent 70%);
+}
+.deck-deal-card-slot::before {
+  background: color-mix(in oklab, var(--blossom-deep) 40%, transparent);
+}
+
+/* Fade the wall on all four sides so it melts into the light page */
+.hof-wall {
+  -webkit-mask-image:
+    linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent),
+    linear-gradient(180deg, transparent, #000 18%, #000 85%, transparent);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent),
+    linear-gradient(180deg, transparent, #000 18%, #000 85%, transparent);
+  mask-composite: intersect;
+}

@@ -4,7 +4,6 @@ import { categories, eventsData } from '../data/eventsData';
 export default function EventsPage({
   events = eventsData,
   onSelectEvent,
-  onNavigateHome,
   onContactTeam
 }) {
   const [activeCategory, setActiveCategory] = useState('all');
@@ -35,19 +34,6 @@ export default function EventsPage({
         <div className="container subpage-hero-container">
           {/* Breadcrumb Bar */}
           <div className="subpage-breadcrumb">
-            <button
-              type="button"
-              className="breadcrumb-back-btn"
-              onClick={onNavigateHome}
-              title="Return to festival homepage"
-            >
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <line x1="19" y1="12" x2="5" y2="12" />
-                <polyline points="12 19 5 12 12 5" />
-              </svg>
-              <span>Back to Fest Home</span>
-            </button>
-            <span className="breadcrumb-sep">•</span>
             <span className="breadcrumb-current">Competitions &amp; Arena Events</span>
           </div>
 

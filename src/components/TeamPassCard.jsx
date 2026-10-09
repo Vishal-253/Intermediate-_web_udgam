@@ -1,14 +1,21 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { subscribeTilt } from '../utils/deviceTilt';
 
 const ANIMATION_CONFIG = {
   INITIAL_DURATION: 1200,
   INITIAL_X_OFFSET: 70,
   INITIAL_Y_OFFSET: 60,
-  DEVICE_BETA_OFFSET: 20,
   ENTER_TRANSITION_MS: 180
 };
+
+const COPY = (
+  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v11" /><path d="M10 7h6l4 4v8a2 2 0 0 1-2 2h-8a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2z" /></svg>
+);
+const CHECK = (
+  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12" /></svg>
+);
 
 const clamp = (v, min = 0, max = 100) => Math.min(Math.max(v, min), max);
 const round = (v, precision = 3) => parseFloat(v.toFixed(precision));
@@ -24,15 +31,14 @@ export default function TeamPassCard({
   festTag = "CREW · UDGAM '26",
   hideRoleInside = false,
   enableTilt = true,
-  enableMobileTilt = false,
-  mobileTiltSensitivity = 4,
+  enableMobileTilt = true,
   behindGlowEnabled = true,
   behindGlowColor = 'rgba(245, 183, 41, 0.42)',
   behindGlowSize = '55%',
   className = ''
 }) {
   const [imageError, setImageError] = useState(false);
-  const [copied, setCopied] = useState(false);
+  const [copied, setCopied] = useState(null);
 
   const wrapRef = useRef(null);
   const shellRef = useRef(null);
@@ -104,7 +110,7 @@ export default function TeamPassCard({
 
       const stillFar = Math.abs(targetX - currentX) > 0.05 || Math.abs(targetY - currentY) > 0.05;
 
-      if (stillFar || document.hasFocus()) {
+      if (stillFar) {
         rafId = requestAnimationFrame(step);
       } else {
         running = false;
@@ -163,7 +169,7 @@ export default function TeamPassCard({
   const handlePointerMove = useCallback(
     (event) => {
       const shell = shellRef.current;
-      if (!shell || !tiltEngine) return;
+      if (!shell || !tiltEngine || event.pointerType === 'touch') return;
       const { x, y } = getOffsets(event, shell);
       tiltEngine.setTarget(x, y);
     },
@@ -174,7 +180,7 @@ export default function TeamPassCard({
     (event) => {
       const shell = shellRef.current;
       const wrap = wrapRef.current;
-      if (!shell || !wrap || !tiltEngine) return;
+      if (!shell || !wrap || !tiltEngine || event.pointerType === 'touch') return;
 
       wrap.classList.add('active');
       shell.classList.add('active');
@@ -190,10 +196,10 @@ export default function TeamPassCard({
     [tiltEngine]
   );
 
-  const handlePointerLeave = useCallback(() => {
+  const handlePointerLeave = useCallback((event) => {
     const shell = shellRef.current;
     const wrap = wrapRef.current;
-    if (!shell || !wrap || !tiltEngine) return;
+    if (!shell || !wrap || !tiltEngine || event?.pointerType === 'touch') return;
 
     tiltEngine.toCenter();
 
@@ -212,28 +218,6 @@ export default function TeamPassCard({
     leaveRafRef.current = requestAnimationFrame(checkSettle);
   }, [tiltEngine]);
 
-  const handleDeviceOrientation = useCallback(
-    (event) => {
-      const shell = shellRef.current;
-      if (!shell || !tiltEngine) return;
-
-      const { beta, gamma } = event;
-      if (beta == null || gamma == null) return;
-
-      const centerX = shell.clientWidth / 2;
-      const centerY = shell.clientHeight / 2;
-      const x = clamp(centerX + gamma * mobileTiltSensitivity, 0, shell.clientWidth);
-      const y = clamp(
-        centerY + (beta - ANIMATION_CONFIG.DEVICE_BETA_OFFSET) * mobileTiltSensitivity,
-        0,
-        shell.clientHeight
-      );
-
-      tiltEngine.setTarget(x, y);
-    },
-    [tiltEngine, mobileTiltSensitivity]
-  );
-
   useEffect(() => {
     if (!enableTilt || !tiltEngine) return;
 
@@ -243,29 +227,10 @@ export default function TeamPassCard({
     const pointerMoveHandler = handlePointerMove;
     const pointerEnterHandler = handlePointerEnter;
     const pointerLeaveHandler = handlePointerLeave;
-    const deviceOrientationHandler = handleDeviceOrientation;
 
     shell.addEventListener('pointerenter', pointerEnterHandler);
     shell.addEventListener('pointermove', pointerMoveHandler);
     shell.addEventListener('pointerleave', pointerLeaveHandler);
-
-    const handleClick = () => {
-      if (!enableMobileTilt || (typeof window !== 'undefined' && window.location.protocol !== 'https:')) return;
-      const anyMotion = typeof window !== 'undefined' ? window.DeviceMotionEvent : null;
-      if (anyMotion && typeof anyMotion.requestPermission === 'function') {
-        anyMotion
-          .requestPermission()
-          .then((state) => {
-            if (state === 'granted') {
-              window.addEventListener('deviceorientation', deviceOrientationHandler);
-            }
-          })
-          .catch(console.error);
-      } else if (typeof window !== 'undefined') {
-        window.addEventListener('deviceorientation', deviceOrientationHandler);
-      }
-    };
-    shell.addEventListener('click', handleClick);
 
     const initialX = (shell.clientWidth || 0) - ANIMATION_CONFIG.INITIAL_X_OFFSET;
     const initialY = ANIMATION_CONFIG.INITIAL_Y_OFFSET;
@@ -277,10 +242,6 @@ export default function TeamPassCard({
       shell.removeEventListener('pointerenter', pointerEnterHandler);
       shell.removeEventListener('pointermove', pointerMoveHandler);
       shell.removeEventListener('pointerleave', pointerLeaveHandler);
-      shell.removeEventListener('click', handleClick);
-      if (typeof window !== 'undefined') {
-        window.removeEventListener('deviceorientation', deviceOrientationHandler);
-      }
       if (enterTimerRef.current) window.clearTimeout(enterTimerRef.current);
       if (leaveRafRef.current) cancelAnimationFrame(leaveRafRef.current);
       tiltEngine.cancel();
@@ -288,64 +249,83 @@ export default function TeamPassCard({
     };
   }, [
     enableTilt,
-    enableMobileTilt,
     tiltEngine,
     handlePointerMove,
     handlePointerEnter,
-    handlePointerLeave,
-    handleDeviceOrientation
+    handlePointerLeave
   ]);
 
-  // Format the yellow role tape text
-  const formatTagText = () => {
-    if (member.tag) return member.tag;
-    const rolePart = (member.badgeText || member.role || 'CREW').toUpperCase();
-    const deptPart = (member.department || member.committeeName || 'CORE')
-      .replace(/Committee|Wing/gi, '')
-      .trim()
-      .toUpperCase();
-    return `${rolePart} · ${deptPart}`;
-  };
+  // Gyroscope tilt on phones: one shared sensor listener, and each card only
+  // subscribes while it is on screen.
+  useEffect(() => {
+    if (!enableTilt || !enableMobileTilt || !tiltEngine) return;
+    const wrap = wrapRef.current;
+    const shell = shellRef.current;
+    if (!wrap || !shell) return;
 
-  const displayPhone = member.phone ? member.phone.replace('+91 ', '').trim() : '';
+    let unsubscribe = null;
+    const onTilt = (nx, ny) => {
+      const w = shell.clientWidth;
+      const h = shell.clientHeight;
+      const moving = nx !== 0 || ny !== 0;
+      wrap.classList.toggle('gyro', moving);
+      // 0.9 keeps the maximum tilt just inside the card edge, like a hover near the rim
+      tiltEngine.setTarget(w / 2 + nx * w * 0.45, h / 2 + ny * h * 0.45);
+    };
 
-  const handleCopyPhone = (e) => {
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !unsubscribe) {
+          unsubscribe = subscribeTilt(onTilt);
+        } else if (!entry.isIntersecting && unsubscribe) {
+          unsubscribe();
+          unsubscribe = null;
+          wrap.classList.remove('gyro');
+          tiltEngine.toCenter();
+        }
+      },
+      { rootMargin: '100px' }
+    );
+    io.observe(wrap);
+
+    return () => {
+      io.disconnect();
+      if (unsubscribe) unsubscribe();
+    };
+  }, [enableTilt, enableMobileTilt, tiltEngine]);
+
+  const copyText = (e, text, kind) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!member.phone) return;
-
-    const rawNumber = member.phone;
+    if (!text) return;
+    const done = () => {
+      setCopied(kind);
+      setTimeout(() => setCopied(null), 1800);
+    };
     if (navigator.clipboard && window.isSecureContext) {
-      navigator.clipboard
-        .writeText(rawNumber)
-        .then(() => {
-          setCopied(true);
-          setTimeout(() => setCopied(false), 2000);
-        })
-        .catch(() => fallbackCopy(rawNumber));
+      navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
     } else {
-      fallbackCopy(rawNumber);
+      fallbackCopy(text, done);
     }
   };
 
-  const fallbackCopy = (text) => {
+  const fallbackCopy = (text, done) => {
     try {
-      const textArea = document.createElement('textarea');
-      textArea.value = text;
-      textArea.style.position = 'fixed';
-      textArea.style.left = '-999999px';
-      textArea.style.top = '-999999px';
-      document.body.appendChild(textArea);
-      textArea.focus();
-      textArea.select();
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.left = '-999999px';
+      document.body.appendChild(ta);
+      ta.select();
       document.execCommand('copy');
-      document.body.removeChild(textArea);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      document.body.removeChild(ta);
+      done();
     } catch (err) {
       console.warn('Fallback copy failed:', err);
     }
   };
+
+  const roleLabel = member.tag || member.badgeText || member.role || 'Crew';
 
   const hasPhoto = Boolean(member.image) && !imageError;
 
@@ -368,187 +348,79 @@ export default function TeamPassCard({
 
       {/* Tilt Interactive Shell */}
       <div ref={shellRef} className="team-pass-shell">
-        <article className="team-pass-card" id={`pass-${member.id}`}>
-          {/* Surface Glare reflection highlight */}
+        <article className="tc-card" id={`pass-${member.id}`}>
           <div className="pc-glare" aria-hidden="true" />
+          <div className="tc-art" aria-hidden="true">
+            <svg className="tc-art-wave" viewBox="0 0 288 90" preserveAspectRatio="none" fill="none">
+              <path d="M0 14 C26 20 38 52 70 56 C110 62 170 40 288 8 L288 90 L0 90 Z" fill="#fbe3e3" />
+              <path d="M52 62 C110 86 170 60 250 48" stroke="#e08a92" strokeWidth="1" />
+            </svg>
+            <svg className="tc-art-flower" viewBox="0 0 40 40" aria-hidden="true">
+              <g transform="translate(20 20)" fill="#f9c5cb" stroke="#d9707c" strokeWidth="1">
+                <path d="M0-3 C-8-8 -7-18 0-17 C7-18 8-8 0-3Z" />
+                <path d="M0-3 C-8-8 -7-18 0-17 C7-18 8-8 0-3Z" transform="rotate(72)" />
+                <path d="M0-3 C-8-8 -7-18 0-17 C7-18 8-8 0-3Z" transform="rotate(144)" />
+                <path d="M0-3 C-8-8 -7-18 0-17 C7-18 8-8 0-3Z" transform="rotate(216)" />
+                <path d="M0-3 C-8-8 -7-18 0-17 C7-18 8-8 0-3Z" transform="rotate(288)" />
+              </g>
+              <circle cx="20" cy="20" r="2" fill="#b4505c" />
+            </svg>
+          </div>
 
-          {/* Top Lanyard Slot Punch Cutout */}
-          <div className="team-pass-slot" aria-hidden="true"></div>
+          <div className="tc-crew">{festTag}</div>
 
-          {/* Festival Crew Identifier */}
-          <div className="team-pass-crew-tag">{festTag}</div>
-
-          {/* Circular Avatar with Radiant Gradient Glow Ring */}
-          <div className="team-pass-avatar-ring">
-            <div className="team-pass-avatar-inner">
+          <div className="tc-avatar-ring">
+            <div className="tc-avatar">
               {hasPhoto ? (
                 <img
                   src={member.image}
                   alt={member.name}
-                  className="team-pass-avatar-img"
+                  className="tc-avatar-img"
                   loading="lazy"
                   onError={() => setImageError(true)}
                 />
               ) : (
-                <div
-                  className="team-pass-avatar-fallback"
-                  style={{
-                    background:
-                      member.avatarGradient ||
-                      'linear-gradient(135deg, #FF6B8B 0%, #FF8E53 100%)'
-                  }}
-                >
-                  <svg
-                    viewBox="0 0 64 64"
-                    width="54"
-                    height="54"
-                    fill="none"
-                    className="team-pass-silhouette"
-                    aria-hidden="true"
-                  >
-                    <circle cx="32" cy="22" r="12" fill="rgba(255, 255, 255, 0.88)" />
-                    <path
-                      d="M12 54 C12 40, 20 36, 32 36 C44 36, 52 40, 52 54 Z"
-                      fill="rgba(255, 255, 255, 0.88)"
-                    />
-                  </svg>
-                  <span className="team-pass-monogram">{member.initials || 'UG'}</span>
-                </div>
+                <svg viewBox="0 0 64 64" className="tc-silhouette" role="img" aria-label={member.name}>
+                  <circle cx="32" cy="24" r="11" fill="#c2c2c6" />
+                  <path d="M11 52 C11 42 20 39 32 39 C44 39 53 42 53 52 C53 55 49 55 32 55 C15 55 11 55 11 52Z" fill="#c2c2c6" />
+                </svg>
               )}
             </div>
           </div>
 
-          {/* Member Name */}
-          <h3 className="team-pass-name" title={member.name}>
-            {member.name}
-          </h3>
+          <h3 className="tc-name" title={member.name}>{member.name}</h3>
+          {!hideRoleInside && <div className="tc-role">{roleLabel}</div>}
 
-          {/* Yellow Role Tape Ribbon (Hidden for Standalone Leadership Cards) */}
-          {!hideRoleInside && (
-            <div className="team-pass-role-ribbon">
-              <span className="team-pass-role-text">{formatTagText()}</span>
+          {(member.phone || member.email) && (
+            <div className="tc-contacts">
+              {member.phone && (
+                <button
+                  type="button"
+                  className={`tc-icon-btn ${copied === 'phone' ? 'copied' : ''}`}
+                  onClick={(e) => copyText(e, member.phone, 'phone')}
+                  title={copied === 'phone' ? 'Copied!' : `${member.phone} (click to copy)`}
+                  aria-label={`Copy phone number ${member.phone}`}
+                >
+                  {copied === 'phone' ? CHECK : (
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
+                  )}
+                </button>
+              )}
+              {member.email && (
+                <button
+                  type="button"
+                  className={`tc-icon-btn ${copied === 'email' ? 'copied' : ''}`}
+                  onClick={(e) => copyText(e, member.email, 'email')}
+                  title={copied === 'email' ? 'Copied!' : `${member.email} (click to copy)`}
+                  aria-label={`Copy email ${member.email}`}
+                >
+                  {copied === 'email' ? CHECK : (
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" /></svg>
+                  )}
+                </button>
+              )}
             </div>
           )}
-
-          {/* Phone Contact with Click-to-Copy */}
-          {member.phone ? (
-            <button
-              type="button"
-              className={`team-pass-phone-btn ${copied ? 'copied' : ''}`}
-              onClick={handleCopyPhone}
-              title="Click to copy phone number to clipboard"
-              aria-label={`Copy phone number ${member.phone}`}
-            >
-              {copied ? (
-                <>
-                  <svg
-                    className="phone-btn-icon"
-                    viewBox="0 0 24 24"
-                    width="13"
-                    height="13"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                  >
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                  <span className="phone-btn-text">Copied</span>
-                </>
-              ) : (
-                <>
-                  <svg
-                    className="phone-btn-icon"
-                    viewBox="0 0 24 24"
-                    width="13"
-                    height="13"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                  >
-                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-                  </svg>
-                  <span className="phone-btn-text">{displayPhone || member.phone}</span>
-                </>
-              )}
-            </button>
-          ) : (
-            <span className="team-pass-phone-placeholder">&nbsp;</span>
-          )}
-
-          {/* Perforated Ticket Divider with Notches */}
-          <div className="team-pass-perforation" aria-hidden="true">
-            <span className="team-pass-notch notch-left"></span>
-            <span className="team-pass-perf-line"></span>
-            <span className="team-pass-notch notch-right"></span>
-          </div>
-
-          {/* Bottom Stub: Clean Email & Barcode (Instagram and LinkedIn removed) */}
-          <div className="team-pass-stub">
-            <div className="team-pass-email-wrap">
-              {member.email ? (
-                <a
-                  href={`mailto:${member.email}`}
-                  className="team-pass-email-link"
-                  title={`Send email to ${member.name} (${member.email})`}
-                  aria-label={`Email ${member.name}`}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <svg
-                    className="team-pass-mail-icon"
-                    viewBox="0 0 24 24"
-                    width="14"
-                    height="14"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                  >
-                    <rect x="2" y="4" width="20" height="16" rx="2" />
-                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
-                  </svg>
-                  <span className="team-pass-email-text">Email</span>
-                </a>
-              ) : (
-                <span className="team-pass-stub-placeholder" />
-              )}
-            </div>
-
-            <div className="team-pass-barcode-wrapper" title="Fest Verification Barcode">
-              <svg
-                className="team-pass-barcode-svg"
-                viewBox="0 0 52 20"
-                width="44"
-                height="17"
-                fill="currentColor"
-                aria-hidden="true"
-              >
-                <rect x="0" y="0" width="1.8" height="20" />
-                <rect x="3.2" y="0" width="1" height="20" />
-                <rect x="5.8" y="0" width="2.6" height="20" />
-                <rect x="10.2" y="0" width="1.2" height="20" />
-                <rect x="12.8" y="0" width="2" height="20" />
-                <rect x="16.4" y="0" width="1" height="20" />
-                <rect x="19" y="0" width="3.2" height="20" />
-                <rect x="24" y="0" width="1" height="20" />
-                <rect x="26.6" y="0" width="1.8" height="20" />
-                <rect x="30" y="0" width="2.6" height="20" />
-                <rect x="34.4" y="0" width="1" height="20" />
-                <rect x="36.8" y="0" width="2" height="20" />
-                <rect x="40.4" y="0" width="1" height="20" />
-                <rect x="42.8" y="0" width="2.8" height="20" />
-                <rect x="47.2" y="0" width="1.4" height="20" />
-                <rect x="50" y="0" width="1.8" height="20" />
-              </svg>
-            </div>
-          </div>
         </article>
       </div>
     </div>

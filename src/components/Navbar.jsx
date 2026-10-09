@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-export default function Navbar({ currentPage = 'home', onNavigate }) {
+export default function Navbar({ currentPage = 'events', onNavigate }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('hero');
   const [isScrolled, setIsScrolled] = useState(false);
@@ -106,9 +106,9 @@ export default function Navbar({ currentPage = 'home', onNavigate }) {
         <div className="nav-container-fluid">
           {/* Left: Typographic logo */}
           <a
-            href="/"
+            href="/events"
             className="nav-brand-clean"
-            onClick={(e) => handleLinkClick(e, 'home', 'hero')}
+            onClick={(e) => handleLinkClick(e, 'events')}
           >
             <span className="brand-wordmark">UDGAM</span>
           </a>
@@ -117,56 +117,11 @@ export default function Navbar({ currentPage = 'home', onNavigate }) {
           <ul className={`nav-center-links ${isMenuOpen ? 'open' : ''}`} id="nav-links">
             <li>
               <a
-                href="/"
-                className={`nav-text-link ${currentPage === 'home' && (activeSection === 'hero' || activeSection === 'gateways') ? 'active' : ''}`}
-                onClick={(e) => handleLinkClick(e, 'home', 'hero')}
-              >
-                Home
-              </a>
-            </li>
-            <li>
-              <a
-                href="/#about"
-                className={`nav-text-link ${currentPage === 'home' && activeSection === 'about' ? 'active' : ''}`}
-                onClick={(e) => handleLinkClick(e, 'home', 'about')}
-              >
-                About
-              </a>
-            </li>
-            <li>
-              <a
                 href="/events"
                 className={`nav-text-link ${currentPage === 'events' ? 'active' : ''}`}
                 onClick={(e) => handleLinkClick(e, 'events')}
               >
                 Events
-              </a>
-            </li>
-            <li>
-              <a
-                href="/schedule"
-                className={`nav-text-link ${currentPage === 'schedule' ? 'active' : ''}`}
-                onClick={(e) => handleLinkClick(e, 'schedule')}
-              >
-                Schedule
-              </a>
-            </li>
-            <li>
-              <a
-                href="/gallery"
-                className={`nav-text-link ${currentPage === 'gallery' ? 'active' : ''}`}
-                onClick={(e) => handleLinkClick(e, 'gallery')}
-              >
-                Gallery
-              </a>
-            </li>
-            <li>
-              <a
-                href="/sponsors"
-                className={`nav-text-link ${currentPage === 'sponsors' ? 'active' : ''}`}
-                onClick={(e) => handleLinkClick(e, 'sponsors')}
-              >
-                Sponsors
               </a>
             </li>
             <li>
@@ -179,16 +134,6 @@ export default function Navbar({ currentPage = 'home', onNavigate }) {
               </a>
             </li>
 
-            {/* Mobile-Only Admin Portal Link */}
-            <li className="nav-admin-mobile-item">
-              <a
-                href="/admin"
-                className={`nav-text-link nav-admin-mobile-link ${currentPage === 'admin' ? 'active' : ''}`}
-                onClick={(e) => handleLinkClick(e, 'admin')}
-              >
-                <span>🛡️ Admin Portal</span>
-              </a>
-            </li>
           </ul>
 
           {/* Right: Search & Desktop Admin & Hamburger */}
@@ -208,22 +153,6 @@ export default function Navbar({ currentPage = 'home', onNavigate }) {
                 <circle cx="11" cy="11" r="8" />
                 <line x1="21" y1="21" x2="16.65" y2="16.65" />
               </svg>
-            </button>
-
-            {/* Desktop Admin Portal Button */}
-            <button
-              type="button"
-              className={`nav-admin-btn ${currentPage === 'admin' ? 'active' : ''}`}
-              onClick={(e) => handleLinkClick(e, 'admin')}
-              title="Open Admin Control Panel"
-              aria-label="Admin Portal"
-            >
-              <span className="nav-admin-icon-shield">
-                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                </svg>
-              </span>
-              <span className="nav-admin-btn-text">Admin</span>
             </button>
 
             {/* Hamburger Menu */}

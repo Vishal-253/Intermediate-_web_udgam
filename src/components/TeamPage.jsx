@@ -2,16 +2,20 @@ import React, { useState, useMemo } from 'react';
 import { teamMembers, committeeCategories, committeeMembers } from '../data/teamData';
 import TeamPassCard from './TeamPassCard';
 import TeamCardDeck from './TeamCardDeck';
+import HallOfFameRow from './HallOfFameRow';
+import TeamDeckOverlay from './TeamDeckOverlay';
+import TiltPrompt from './TiltPrompt';
 
-export default function TeamPage({ onNavigateHome }) {
-  // Track open/collapsed state independently for each committee deck
-  const [openDecks, setOpenDecks] = useState({});
+export default function TeamPage() {
+  // Track currently active committee deck displayed in the overlay view
+  const [activeDeck, setActiveDeck] = useState(null);
 
-  const toggleDeck = (deckId) => {
-    setOpenDecks((prev) => ({
-      ...prev,
-      [deckId]: !prev[deckId]
-    }));
+  const handleOpenDeck = (deck) => {
+    setActiveDeck(deck);
+  };
+
+  const handleCloseDeck = () => {
+    setActiveDeck(null);
   };
 
   // 1. President (Single Standalone Card)
@@ -55,11 +59,12 @@ export default function TeamPage({ onNavigateHome }) {
           subtitle: cat.fullName || `${title} Committee`,
           roleText: `${members.length} PASSES IN DECK`,
           icon: cat.icon || '🎴',
+          coverImage: `/assets/images/committees/${cat.id}.webp`,
           members: members
         };
       });
 
-    return [
+    const executiveDecks = [
       {
         id: 'conveners',
         title: 'Conveners',
@@ -75,13 +80,29 @@ export default function TeamPage({ onNavigateHome }) {
         roleText: `${gensecMembers.length} PASSES IN DECK`,
         icon: '📜',
         members: gensecMembers
-      },
-      ...operationalDecks
+      }
     ];
+
+    return { executiveDecks, operationalDecks };
   }, []);
 
+  const renderDeck = (deck) => (
+    <TeamCardDeck
+      key={deck.id}
+      id={deck.id}
+      title={deck.title}
+      subtitle={deck.subtitle}
+      deckRoleText={deck.roleText}
+      coverEmblem={deck.icon}
+      coverImage={deck.coverImage}
+      members={deck.members}
+      isOpen={activeDeck?.id === deck.id}
+      onToggle={() => handleOpenDeck(deck)}
+    />
+  );
+
   return (
-    <div className="team-page-root">
+    <div className={`team-page-root ${activeDeck ? 'team-page-has-deck-overlay' : ''}`}>
       {/* Upper Ambient Atmosphere Glow */}
       <div className="team-ambient-glow" aria-hidden="true" />
 
@@ -120,31 +141,35 @@ export default function TeamPage({ onNavigateHome }) {
           </div>
         </section>
 
-        {/* ==================================================================
-            4. ORGANISING COMMITTEE (Separate Card Deck for Every Committee)
-            ================================================================== */}
+        {/* Conveners & General Secretary decks, above the organising committee */}
+        <section className="team-tier-section tier-executive-decks" aria-label="Conveners and General Secretary">
+          <div className="committee-decks-grid">
+            {committeeDecks.executiveDecks.map(renderDeck)}
+          </div>
+        </section>
+
+        {/* Organising Committee: operational wings, starting from Sponsorship */}
         <section className="team-tier-section tier-organising-committee" aria-label="Organising Committee">
           <div className="organising-committee-header">
             <h2 className="organising-committee-title">Organising Committee</h2>
           </div>
 
-          <div className="committee-decks-grid">
-            {committeeDecks.map((deck) => (
-              <TeamCardDeck
-                key={deck.id}
-                id={deck.id}
-                title={deck.title}
-                subtitle={deck.subtitle}
-                deckRoleText={deck.roleText}
-                coverEmblem={deck.icon}
-                members={deck.members}
-                isOpen={Boolean(openDecks[deck.id])}
-                onToggle={() => toggleDeck(deck.id)}
-              />
-            ))}
-          </div>
+          <HallOfFameRow label="Organising Committee">
+            {committeeDecks.operationalDecks.map(renderDeck)}
+          </HallOfFameRow>
         </section>
       </main>
+
+      {/* ==================================================================
+          5. COMMITTEE DECK OVERLAY VIEW
+          Appears over the previous teams page with translucent background.
+          Profiles deal in from left to right as realistic playing cards.
+          ================================================================== */}
+      {activeDeck && (
+        <TeamDeckOverlay deck={activeDeck} onClose={handleCloseDeck} />
+      )}
+
+      <TiltPrompt />
     </div>
   );
 }
