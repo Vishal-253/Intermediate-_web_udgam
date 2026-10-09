@@ -17,6 +17,10 @@ const CHECK = (
   <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12" /></svg>
 );
 
+// Maximum card rotation (degrees) at the card edge / full phone tilt.
+const MAX_ROTATE_X = 18;
+const MAX_ROTATE_Y = 16;
+
 const clamp = (v, min = 0, max = 100) => Math.min(Math.max(v, min), max);
 const round = (v, precision = 3) => parseFloat(v.toFixed(precision));
 const adjust = (v, fMin, fMax, tMin, tMax) => round(tMin + ((tMax - tMin) * (v - fMin)) / (fMax - fMin));
@@ -76,7 +80,6 @@ export default function TeamPassCard({
       const centerX = percentX - 50;
       const centerY = percentY - 50;
 
-      // Keep rotation angles subtle & refined (max ~10-12 deg) to remain elegant and clean
       const properties = {
         '--pointer-x': `${percentX}%`,
         '--pointer-y': `${percentY}%`,
@@ -85,8 +88,8 @@ export default function TeamPassCard({
         '--pointer-from-center': `${clamp(Math.hypot(percentY - 50, percentX - 50) / 50, 0, 1)}`,
         '--pointer-from-top': `${percentY / 100}`,
         '--pointer-from-left': `${percentX / 100}`,
-        '--rotate-x': `${round(-(centerX / 5.5))}deg`,
-        '--rotate-y': `${round(centerY / 4.8)}deg`
+        '--rotate-x': `${round(-(centerX / 50) * MAX_ROTATE_X)}deg`,
+        '--rotate-y': `${round((centerY / 50) * MAX_ROTATE_Y)}deg`
       };
 
       for (const [k, v] of Object.entries(properties)) {
@@ -269,8 +272,8 @@ export default function TeamPassCard({
       const h = shell.clientHeight;
       const moving = nx !== 0 || ny !== 0;
       wrap.classList.toggle('gyro', moving);
-      // 0.9 keeps the maximum tilt just inside the card edge, like a hover near the rim
-      tiltEngine.setTarget(w / 2 + nx * w * 0.45, h / 2 + ny * h * 0.45);
+      // full phone tilt maps to the card edge, i.e. the maximum rotation
+      tiltEngine.setTarget(w / 2 + nx * w * 0.5, h / 2 + ny * h * 0.5);
     };
 
     const io = new IntersectionObserver(

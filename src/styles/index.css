@@ -7910,8 +7910,8 @@ button {
   position: relative;
   width: 100%;
   aspect-ratio: 2 / 3;
-  /* bottom padding keeps the contact pills clear of the wave art */
-  padding: 9% 7% 26%;
+  /* contact icons sit low, over the wave art, to leave room for two-line names */
+  padding: 9% 7% 13%;
   display: flex;
   flex-direction: column;
   align-items: center;

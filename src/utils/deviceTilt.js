@@ -17,7 +17,7 @@
  */
 
 const STORAGE_KEY = 'udgam_tilt_permission';
-const MAX_TILT_DEG = 18;          // degrees of phone tilt that map to a full card tilt
+const MAX_TILT_DEG = 12;          // degrees of phone tilt that map to a full card tilt
 const BASELINE_TAU_MS = 9000;     // how slowly "flat" follows a new holding posture
 const NO_DATA_TIMEOUT_MS = 1500;  // only empty readings by then means no gyroscope
 
