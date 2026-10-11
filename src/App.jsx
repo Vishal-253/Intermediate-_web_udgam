@@ -4,8 +4,6 @@ import Navbar from './components/Navbar';
 import EventsPage from './components/EventsPage';
 import TeamPage from './components/TeamPage';
 import Footer from './components/Footer';
-import EventModal from './components/EventModal';
-import { getStoredEvents } from './utils/festivalStore';
 
 const getInitialPage = () => {
   if (typeof window !== 'undefined') {
@@ -19,13 +17,10 @@ const getInitialPage = () => {
 const getPageTitle = (page) =>
   page === 'team'
     ? 'Organizing Committee & Leads | Udgam 2026 — Chase the Bloom'
-    : 'Competitions & Arenas | Udgam 2026 — NIT Sikkim';
+    : 'Events | Udgam 2026 — Pick your stage';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState(getInitialPage);
-  const [eventsList, setEventsList] = useState(getStoredEvents);
-
-  const [selectedEvent, setSelectedEvent] = useState(null);
 
   // Sync route with browser history (back/forward) & hashchange
   useEffect(() => {
@@ -41,17 +36,6 @@ export default function App() {
       window.removeEventListener('popstate', handleLocationChange);
       window.removeEventListener('hashchange', handleLocationChange);
     };
-  }, []);
-
-  // Sync state if festival data updates from other sources
-  useEffect(() => {
-    const handleDataUpdate = (e) => {
-      if (e.detail?.type === 'events') {
-        setEventsList(getStoredEvents());
-      }
-    };
-    window.addEventListener('udgam:data_update', handleDataUpdate);
-    return () => window.removeEventListener('udgam:data_update', handleDataUpdate);
   }, []);
 
   // Update document title on page change
@@ -82,25 +66,12 @@ export default function App() {
         {currentPage === 'team' ? (
           <TeamPage />
         ) : (
-          <EventsPage
-            events={eventsList}
-            onSelectEvent={(event) => setSelectedEvent(event)}
-            onContactTeam={() => handleNavigate('team')}
-          />
+          <EventsPage onContactTeam={() => handleNavigate('team')} />
         )}
       </main>
 
       <Footer onNavigate={handleNavigate} />
 
-      {/* MODALS */}
-      <EventModal
-        event={selectedEvent}
-        onClose={() => setSelectedEvent(null)}
-        onContactTeam={() => {
-          setSelectedEvent(null);
-          handleNavigate('team');
-        }}
-      />
     </div>
   );
 }

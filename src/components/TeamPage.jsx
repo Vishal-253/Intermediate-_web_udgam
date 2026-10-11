@@ -67,6 +67,7 @@ export default function TeamPage() {
     const executiveDecks = [
       {
         id: 'conveners',
+        coverImage: '/assets/images/committees/conveners.webp',
         title: 'Conveners',
         subtitle: 'Core Operations & Orchestration',
         roleText: `${convenerMembers.length} PASSES IN DECK`,
@@ -75,6 +76,7 @@ export default function TeamPage() {
       },
       {
         id: 'gensec',
+        coverImage: '/assets/images/committees/gensec.webp',
         title: 'General Secretary',
         subtitle: 'Executive Secretariat',
         roleText: `${gensecMembers.length} PASSES IN DECK`,
@@ -150,11 +152,14 @@ export default function TeamPage() {
 
         {/* Organising Committee: operational wings, starting from Sponsorship */}
         <section className="team-tier-section tier-organising-committee" aria-label="Organising Committee">
-          <div className="organising-committee-header">
-            <h2 className="organising-committee-title">Organising Committee</h2>
-          </div>
-
-          <HallOfFameRow label="Organising Committee">
+          <HallOfFameRow
+            label="Organising Committee"
+            heading={
+              <div className="organising-committee-header">
+                <h2 className="organising-committee-title">Organising Committee</h2>
+              </div>
+            }
+          >
             {committeeDecks.operationalDecks.map(renderDeck)}
           </HallOfFameRow>
         </section>

@@ -642,27 +642,6 @@ h1, h2, h3 {
   box-shadow: 0 0 0 2px var(--ring), var(--shadow-hover);
 }
 
-/* Hall-of-fame wall: blush gallery instead of a dark corridor */
-.hof-wall-far {
-  background:
-    repeating-linear-gradient(90deg, color-mix(in oklab, var(--blossom-deep) 12%, transparent) 0 2px, transparent 2px 420px),
-    repeating-linear-gradient(90deg, oklch(1 0 0 / 0.35) 0 150px, transparent 150px 420px);
-}
-.hof-wall-mid {
-  background:
-    repeating-linear-gradient(90deg, color-mix(in oklab, var(--blossom-deep) 18%, transparent) 0 1px, transparent 1px 300px),
-    repeating-linear-gradient(90deg, transparent 0 60px, color-mix(in oklab, var(--blossom) 22%, transparent) 60px 240px, transparent 240px 300px);
-}
-.hof-rail {
-  background: linear-gradient(90deg, transparent, var(--ring), transparent);
-}
-.hof-floor {
-  background:
-    repeating-linear-gradient(90deg, color-mix(in oklab, var(--blossom-deep) 12%, transparent) 0 1px, transparent 1px 160px),
-    linear-gradient(180deg, color-mix(in oklab, var(--blossom) 30%, transparent), color-mix(in oklab, var(--blossom) 55%, transparent));
-  border-top: 1px solid var(--border);
-}
-
 /* Deal overlay: page underneath turns into frosted blush glass */
 .deck-page-overlay-root {
   background: color-mix(in oklab, var(--background) 55%, transparent);
@@ -678,16 +657,4 @@ h1, h2, h3 {
 }
 .deck-deal-card-slot::before {
   background: color-mix(in oklab, var(--blossom-deep) 40%, transparent);
-}
-
-/* Fade the wall on all four sides so it melts into the light page */
-.hof-wall {
-  -webkit-mask-image:
-    linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent),
-    linear-gradient(180deg, transparent, #000 18%, #000 85%, transparent);
-  -webkit-mask-composite: source-in;
-  mask-image:
-    linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent),
-    linear-gradient(180deg, transparent, #000 18%, #000 85%, transparent);
-  mask-composite: intersect;
 }

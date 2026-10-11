@@ -7813,73 +7813,29 @@ button {
   position: sticky;
   top: 0;
   height: 100vh;
+  /* title + row are centred together, so there is no gap between them */
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.hof-heading .organising-committee-header {
+  margin-bottom: 0;
 }
 
 .hof-gallery {
-  --hof-scroll: 0;
   position: relative;
   width: 100%;
-  padding: 36px 0 56px;
+  padding: 0 0 40px;
   overflow: hidden;
   isolation: isolate;
-}
-
-.hof-wall {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
-  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
-}
-
-.hof-layer {
-  position: absolute;
-  left: 0;
-  right: 0;
-  will-change: background-position;
-}
-
-.hof-wall-far {
-  inset: 0;
-  background:
-    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.045) 0 2px, transparent 2px 420px),
-    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.018) 0 150px, transparent 150px 420px);
-  background-position-x: calc(var(--hof-scroll) * -0.18px);
-}
-
-.hof-wall-mid {
-  top: 12%;
-  bottom: 18%;
-  background:
-    repeating-linear-gradient(90deg, rgba(245, 183, 41, 0.1) 0 1px, transparent 1px 300px),
-    repeating-linear-gradient(90deg, transparent 0 60px, rgba(0, 0, 0, 0.22) 60px 240px, transparent 240px 300px);
-  background-position-x: calc(var(--hof-scroll) * -0.45px);
-}
-
-.hof-rail {
-  top: 7%;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, rgba(245, 183, 41, 0.28), transparent);
-}
-
-.hof-floor {
-  bottom: 0;
-  height: 18%;
-  background:
-    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 160px),
-    linear-gradient(180deg, rgba(245, 183, 41, 0.1), rgba(0, 0, 0, 0.45));
-  background-position-x: calc(var(--hof-scroll) * -0.9px), 0 0;
-  border-top: 1px solid rgba(245, 183, 41, 0.22);
 }
 
 .hof-track {
   display: flex;
   align-items: flex-start;
   gap: 104px;
-  padding: 24px max(7vw, 32px) 40px;
+  padding: 20px max(7vw, 32px) 40px;
   overflow: hidden;
   perspective: 1400px;
 }
@@ -7900,7 +7856,6 @@ button {
 
 @media (prefers-reduced-motion: reduce) {
   .hof-item { transform: none; opacity: 1; }
-  .hof-wall-far, .hof-wall-mid, .hof-floor { background-position-x: 0; }
 }
 
 /* ==========================================================================
@@ -8216,13 +8171,13 @@ button {
 }
 
 .hof-mode-swipe .hof-gallery {
-  padding: 16px 0 20px;
+  padding: 0 0 20px;
 }
 
 .hof-mode-swipe .hof-track {
   gap: 28px;
   /* side padding lets the first and last deck snap to the centre */
-  padding: 24px calc(50% - 126px) 32px;
+  padding: 28px calc(50% - 126px) 32px;
   overflow-x: auto;
   overflow-y: hidden;
   scroll-snap-type: x mandatory;

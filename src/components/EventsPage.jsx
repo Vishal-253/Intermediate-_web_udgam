@@ -1,233 +1,397 @@
-import React, { useState, useMemo } from 'react';
-import { categories, eventsData } from '../data/eventsData';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { events, EVENT_CATEGORIES, cardTaglines } from '../data/eventDetails';
+import { formatFee } from '../utils/registration';
+import { CategoryChip, RegisterButton, RotatingTagline, categoryOf } from './events/EventBits';
+import { ArrowIcon, CategoryIcon, CloseIcon, DocIcon, SearchIcon } from './events/eventIcons';
+import EventDrawer from './events/EventDrawer';
+import RegistrationTray from './events/RegistrationTray';
 
-export default function EventsPage({
-  events = eventsData,
-  onSelectEvent,
-  onContactTeam
-}) {
-  const [activeCategory, setActiveCategory] = useState('all');
-  const [searchQuery, setSearchQuery] = useState('');
+const PASS_KEY = 'udgam_event_pass';
 
-  const currentEvents = events || eventsData;
+// Headliner order: the first one gets the large spotlight tile.
+const SPOTLIGHT_ORDER = [
+  'dance-competition',
+  'food-fiesta',
+  'treasure-hunt',
+  'ipl-auction',
+  'ramp-walk',
+  'singing-competition',
+  'wall-painting',
+  'housie',
+  'spoil-the-tshirt',
+];
 
-  // Filter events based on active category and search query
-  const filteredEvents = useMemo(() => {
-    return currentEvents.filter(event => {
-      const matchesCategory = activeCategory === 'all' || event.category === activeCategory;
-      const q = searchQuery.trim().toLowerCase();
-      const matchesSearch = q === '' ||
-        event.title.toLowerCase().includes(q) ||
-        event.desc.toLowerCase().includes(q) ||
-        (event.categoryLabel && event.categoryLabel.toLowerCase().includes(q)) ||
-        (event.venue && event.venue.toLowerCase().includes(q));
+const SORTS = {
+  featured: { label: 'Featured', fn: null },
+  'fee-asc': { label: 'Fee: low to high', fn: (a, b) => a.fee - b.fee },
+  'fee-desc': { label: 'Fee: high to low', fn: (a, b) => b.fee - a.fee },
+  name: { label: 'Name A–Z', fn: (a, b) => a.name.localeCompare(b.name) },
+};
 
-      return matchesCategory && matchesSearch;
+const TIERS = [
+  { id: 'all', label: 'All events' },
+  { id: 'major', label: 'Headliners' },
+  { id: 'regular', label: 'Open floor' },
+];
+
+const loadPass = () => {
+  try {
+    const ids = JSON.parse(localStorage.getItem(PASS_KEY) || '[]');
+    return Array.isArray(ids) ? ids.filter((id) => events.some((e) => e.id === id)) : [];
+  } catch {
+    return [];
+  }
+};
+
+const searchText = (e) =>
+  [e.name, categoryOf(e.category).label, e.description, ...(e.taglines || []), ...(e.rounds || []),
+    ...(e.games || []).flatMap((g) => [g.name, ...g.taglines])]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase();
+
+export default function EventsPage({ onContactTeam }) {
+  const [query, setQuery] = useState('');
+  const [tier, setTier] = useState('all');
+  const [category, setCategory] = useState('all');
+  const [sort, setSort] = useState('featured');
+  const [openId, setOpenId] = useState(null);
+  const [pass, setPass] = useState(loadPass);
+  const searchRef = useRef(null);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(PASS_KEY, JSON.stringify(pass));
+    } catch {
+      /* storage unavailable: the pass just won't persist */
+    }
+  }, [pass]);
+
+  // "/" focuses search (desktop convenience)
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key !== '/' || openId) return;
+      const tag = document.activeElement?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+      e.preventDefault();
+      searchRef.current?.focus();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [openId]);
+
+  const togglePass = useCallback(
+    (id) => setPass((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id])),
+    []
+  );
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    let list = events.filter(
+      (e) =>
+        (tier === 'all' || e.tier === tier) &&
+        (category === 'all' || e.category === category) &&
+        (!q || searchText(e).includes(q))
+    );
+    if (SORTS[sort].fn) list = [...list].sort(SORTS[sort].fn);
+    return list;
+  }, [query, tier, category, sort]);
+
+  const headliners = useMemo(() => {
+    const list = filtered.filter((e) => e.tier === 'major');
+    return sort === 'featured'
+      ? list.sort((a, b) => SPOTLIGHT_ORDER.indexOf(a.id) - SPOTLIGHT_ORDER.indexOf(b.id))
+      : list;
+  }, [filtered, sort]);
+  const openFloor = useMemo(() => filtered.filter((e) => e.tier === 'regular'), [filtered]);
+
+  const counts = useMemo(() => {
+    const inTier = events.filter((e) => tier === 'all' || e.tier === tier);
+    const c = { all: inTier.length };
+    EVENT_CATEGORIES.forEach((cat) => {
+      c[cat.id] = inTier.filter((e) => e.category === cat.id).length;
     });
-  }, [currentEvents, activeCategory, searchQuery]);
+    return c;
+  }, [tier]);
+
+  const isFiltered = query || tier !== 'all' || category !== 'all';
+  const resetFilters = () => {
+    setQuery('');
+    setTier('all');
+    setCategory('all');
+  };
+
+  const minFee = Math.min(...events.map((e) => e.fee));
+  const openEvent = events.find((e) => e.id === openId) || null;
+  // spotlight tile only when the featured layout is showing the full headliner set
+  const showSpotlight = sort === 'featured' && headliners.length >= 3;
 
   return (
-    <div className="subpage-root events-page-root">
-      {/* 1. Hero & Breadcrumb Banner */}
-      <section className="subpage-hero-section">
-        <div className="subpage-hero-bg-glow"></div>
-        <div className="container subpage-hero-container">
-          {/* Breadcrumb Bar */}
-          <div className="subpage-breadcrumb">
-            <span className="breadcrumb-current">Competitions &amp; Arena Events</span>
+    <div className="ep-root">
+      {/* ------------------------------------------------------------ Header */}
+      <header className="ep-hero">
+        <p className="ep-eyebrow">Udgam 2026 · Event programme</p>
+        <h1 className="ep-title">
+          Pick your <em>stage.</em>
+        </h1>
+        <p className="ep-lede">
+          {events.length} events across games, sport, performance, food and more. Add the ones you
+          want to your pass and register for them in one go.
+        </p>
+        <dl className="ep-stats">
+          <div>
+            <dt>Events</dt>
+            <dd>{events.length}</dd>
           </div>
-
-          <div className="subpage-hero-content">
-            <div className="fest-pill-badge">
-              <span className="badge-flower">🌸</span>
-              <span>UDGAM 2026 COMPETITIONS &amp; ARENAS</span>
-            </div>
-
-            <h1 className="subpage-hero-title">
-              Spectacles in <span className="text-glow-blush">Full Bloom</span>
-            </h1>
-
-            <p className="subpage-hero-subtitle">
-              Choose your stage and unfold your brilliance across music, code, dance, fine arts, and literary challenges.
-              Compete alongside the brightest talents from 40+ premier colleges for over ₹5,00,000 in grand prize pools and trophies.
-            </p>
-
-            {/* Metric Highlights */}
-            <div className="subpage-metrics-row">
-              <div className="subpage-metric-card">
-                <span className="metric-icon">🏆</span>
-                <div className="metric-info">
-                  <strong>₹5,00,000+</strong>
-                  <span>Cumulative Cash Pool</span>
-                </div>
-              </div>
-              <div className="subpage-metric-card">
-                <span className="metric-icon">🎭</span>
-                <div className="metric-info">
-                  <strong>50+ Events</strong>
-                  <span>Cultural, Tech &amp; Arts</span>
-                </div>
-              </div>
-              <div className="subpage-metric-card">
-                <span className="metric-icon">📜</span>
-                <div className="metric-info">
-                  <strong>National Certificates</strong>
-                  <span>Endorsed by NIT Sikkim</span>
-                </div>
-              </div>
-            </div>
+          <div>
+            <dt>Headliners</dt>
+            <dd>{events.filter((e) => e.tier === 'major').length}</dd>
           </div>
-        </div>
-      </section>
-
-      {/* 2. Interactive Search & Arena Filters */}
-      <section className="events-controls-section">
-        <div className="container">
-          <div className="events-search-bar-wrap">
-            <div className="events-search-input-box">
-              <span className="search-box-icon">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="11" cy="11" r="8" />
-                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                </svg>
-              </span>
-              <input
-                type="text"
-                placeholder="Search events by title, domain, or venue..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="events-search-input"
-                aria-label="Search events"
-              />
-              {searchQuery && (
-                <button
-                  type="button"
-                  className="search-clear-btn"
-                  onClick={() => setSearchQuery('')}
-                  title="Clear search"
-                >
-                  ✕
-                </button>
-              )}
-            </div>
-
-            <div className="events-count-pill">
-              <span>Showing <strong>{filteredEvents.length}</strong> events</span>
-            </div>
+          <div>
+            <dt>Categories</dt>
+            <dd>{EVENT_CATEGORIES.length}</dd>
           </div>
+          <div>
+            <dt>Entry from</dt>
+            <dd>{formatFee(minFee)}</dd>
+          </div>
+        </dl>
+      </header>
 
-          {/* Category Filter Tabs */}
-          <div className="events-filter-bar subpage-filter-bar">
-            {categories.map(cat => (
+      {/* ------------------------------------------------------ Control bar */}
+      <div className="ep-controls" role="search">
+        <div className="ep-controls-row">
+          <label className="ep-search">
+            <SearchIcon className="ep-search-icon" />
+            <span className="ep-visually-hidden">Search events</span>
+            <input
+              ref={searchRef}
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search events, games, taglines…"
+              autoComplete="off"
+            />
+            {query ? (
+              <button type="button" className="ep-search-clear" onClick={() => setQuery('')} aria-label="Clear search">
+                <CloseIcon />
+              </button>
+            ) : (
+              <kbd className="ep-kbd" aria-hidden="true">/</kbd>
+            )}
+          </label>
+
+          <div className="ep-segment" role="tablist" aria-label="Event type">
+            {TIERS.map((t) => (
               <button
-                key={cat.id}
+                key={t.id}
                 type="button"
-                className={`filter-tab ${activeCategory === cat.id ? 'active' : ''}`}
-                onClick={() => setActiveCategory(cat.id)}
+                role="tab"
+                aria-selected={tier === t.id}
+                className={tier === t.id ? 'is-active' : ''}
+                onClick={() => setTier(t.id)}
               >
-                <span className="tab-flower">{cat.flower}</span> {cat.label}
+                {t.label}
               </button>
             ))}
           </div>
-        </div>
-      </section>
 
-      {/* 3. Events Grid */}
-      <section className="section events-page-grid-section">
-        <div className="container">
-          {filteredEvents.length === 0 ? (
-            <div className="events-empty-state card-bloom">
-              <span className="empty-flower">🌸</span>
-              <h3>No events matched your search</h3>
-              <p>Try searching for a different keyword or reset the category filters.</p>
-              <button
-                type="button"
-                className="btn btn-outline"
-                onClick={() => {
-                  setActiveCategory('all');
-                  setSearchQuery('');
-                }}
-              >
-                Reset All Filters
-              </button>
-            </div>
-          ) : (
-            <div className="events-grid" id="events-grid">
-              {filteredEvents.map(event => (
-                <article
-                  key={event.id}
-                  className="event-card card-bloom"
-                  data-category={event.category}
-                >
-                  {/* Petal Corner Ornaments */}
-                  <div className="card-petal-corner top-left">
-                    <svg viewBox="0 0 30 30" width="24" height="24">
-                      <path d="M0 0 C15 0 30 15 30 30 C15 30 0 15 0 0 Z" fill="#FF6B8B" opacity="0.8" />
-                    </svg>
-                  </div>
-                  <div className="card-petal-corner bottom-right">
-                    <svg viewBox="0 0 30 30" width="24" height="24">
-                      <path d="M30 30 C15 30 0 15 0 0 C15 0 30 15 30 30 Z" fill="#FF6B8B" opacity="0.8" />
-                    </svg>
-                  </div>
-
-                  <div className="event-badge-row">
-                    <span className="event-cat-badge">{event.categoryLabel}</span>
-                    <span className="event-prize-badge">{event.prize}</span>
-                  </div>
-
-                  <h3 className="event-title">{event.title}</h3>
-                  <p className="event-desc">{event.desc}</p>
-
-                  <div className="event-meta-row">
-                    <span className="meta-item"><span className="meta-icon">📅</span> {event.date}</span>
-                    <span className="meta-item"><span className="meta-icon">📍</span> {event.venue}</span>
-                  </div>
-
-                  {event.teamSize && (
-                    <div className="event-meta-subrow">
-                      <span className="meta-teamsize">👥 {event.teamSize}</span>
-                    </div>
-                  )}
-
-                  <button
-                    type="button"
-                    className="btn-event-detail"
-                    onClick={() => onSelectEvent(event)}
-                  >
-                    <span>View Guidelines &amp; Rules</span>
-                    <span className="btn-mini-arrow">→</span>
-                  </button>
-                </article>
+          <label className="ep-sort">
+            <span className="ep-visually-hidden">Sort events</span>
+            <select value={sort} onChange={(e) => setSort(e.target.value)}>
+              {Object.entries(SORTS).map(([id, s]) => (
+                <option key={id} value={id}>
+                  {s.label}
+                </option>
               ))}
-            </div>
-          )}
-
-          {/* 4. Bottom Support / Coordinator Banner */}
-          <div className="subpage-callout-banner card-bloom">
-            <div className="callout-banner-content">
-              <span className="callout-badge">🤝 EVENT COORDINATION &amp; QUERIES</span>
-              <h3 className="callout-title">Need clarification on event rules or registrations?</h3>
-              <p className="callout-desc">
-                Our Student Technical, Cultural, and Literary Committee leads are available round the clock 
-                to assist your college contingent with rules, travel, and schedule coordination.
-              </p>
-            </div>
-            <div className="callout-banner-actions">
-              {onContactTeam && (
-                <button
-                  type="button"
-                  className="btn btn-primary btn-bloom"
-                  onClick={onContactTeam}
-                >
-                  <span className="btn-text">Connect with Committee Leads</span>
-                  <span className="btn-arrow">→</span>
-                </button>
-              )}
-            </div>
-          </div>
+            </select>
+          </label>
         </div>
-      </section>
+
+        <div className="ep-chips" aria-label="Filter by category">
+          <button
+            type="button"
+            className={`ep-chip ${category === 'all' ? 'is-active' : ''}`}
+            aria-pressed={category === 'all'}
+            onClick={() => setCategory('all')}
+          >
+            All <span className="ep-chip-count">{counts.all}</span>
+          </button>
+          {EVENT_CATEGORIES.map((cat) => (
+            <button
+              key={cat.id}
+              type="button"
+              className={`ep-chip ${category === cat.id ? 'is-active' : ''}`}
+              style={{ '--hue': cat.hue }}
+              aria-pressed={category === cat.id}
+              disabled={counts[cat.id] === 0}
+              onClick={() => setCategory(category === cat.id ? 'all' : cat.id)}
+            >
+              <CategoryIcon id={cat.id} className="ep-chip-icon" />
+              {cat.label} <span className="ep-chip-count">{counts[cat.id]}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {isFiltered && (
+        <p className="ep-result-line" aria-live="polite">
+          Showing <strong>{filtered.length}</strong> of {events.length} events
+          <button type="button" className="ep-link-btn" onClick={resetFilters}>
+            Clear filters
+          </button>
+        </p>
+      )}
+
+      {/* -------------------------------------------------------- Headliners */}
+      {headliners.length > 0 && (
+        <section className="ep-section" aria-labelledby="ep-headliners">
+          <div className="ep-section-head">
+            <h2 id="ep-headliners">Headliners</h2>
+            <p>The big-stage events of Udgam.</p>
+          </div>
+          <div className={`ep-bento ${showSpotlight ? 'has-spotlight' : ''}`}>
+            {headliners.map((e, i) => (
+              <HeadlinerTile
+                key={e.id}
+                event={e}
+                index={i}
+                spotlight={showSpotlight && i === 0}
+                added={pass.includes(e.id)}
+                onToggle={() => togglePass(e.id)}
+                onOpen={() => setOpenId(e.id)}
+              />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* -------------------------------------------------------- Open floor */}
+      {openFloor.length > 0 && (
+        <section className="ep-section" aria-labelledby="ep-open-floor">
+          <div className="ep-section-head">
+            <h2 id="ep-open-floor">Open floor</h2>
+            <p>Quick-fire games and contests running through the fest.</p>
+          </div>
+          <div className="ep-tickets">
+            {openFloor.map((e) => (
+              <TicketCard
+                key={e.id}
+                event={e}
+                added={pass.includes(e.id)}
+                onToggle={() => togglePass(e.id)}
+                onOpen={() => setOpenId(e.id)}
+              />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {filtered.length === 0 && (
+        <div className="ep-empty">
+          <p className="ep-empty-title">No events match that.</p>
+          <p>Try a different search or category.</p>
+          <button type="button" className="ep-btn-ghost" onClick={resetFilters}>
+            Reset filters
+          </button>
+        </div>
+      )}
+
+      {onContactTeam && (
+        <aside className="ep-help">
+          <div>
+            <p className="ep-help-title">Questions about an event?</p>
+            <p>The organising committee leads can help with rules, teams and registration.</p>
+          </div>
+          <button type="button" className="ep-btn-ghost" onClick={onContactTeam}>
+            Meet the committee <ArrowIcon className="ep-btn-icon" />
+          </button>
+        </aside>
+      )}
+
+      <EventDrawer
+        event={openEvent}
+        added={openEvent ? pass.includes(openEvent.id) : false}
+        onToggle={() => openEvent && togglePass(openEvent.id)}
+        onClose={() => setOpenId(null)}
+      />
+
+      <RegistrationTray
+        items={pass.map((id) => events.find((e) => e.id === id)).filter(Boolean)}
+        onRemove={togglePass}
+        onClear={() => setPass([])}
+        onOpenEvent={setOpenId}
+      />
     </div>
+  );
+}
+
+function HeadlinerTile({ event, index, spotlight, added, onToggle, onOpen }) {
+  const cat = categoryOf(event.category);
+  return (
+    <article
+      className={`ep-tile ${spotlight ? 'is-spotlight' : ''} ${added ? 'is-added' : ''}`}
+      style={{ '--hue': cat.hue }}
+    >
+      <CategoryIcon id={cat.id} className="ep-tile-glyph" />
+      <div className="ep-tile-top">
+        <span className="ep-tile-index">{String(index + 1).padStart(2, '0')}</span>
+        <CategoryChip id={event.category} small />
+        <span className="ep-fee-pill">{formatFee(event.fee)}</span>
+      </div>
+
+      <h3 className="ep-tile-title">
+        <button type="button" className="ep-stretch" onClick={onOpen}>
+          {event.name}
+        </button>
+      </h3>
+      <RotatingTagline lines={cardTaglines(event)} />
+      {event.description && <p className="ep-tile-desc">{event.description}</p>}
+      {!event.description && !cardTaglines(event).length && (
+        <p className="ep-tile-desc">Full format in the event document.</p>
+      )}
+
+      <div className="ep-tile-actions">
+        <RegisterButton added={added} onToggle={onToggle} eventName={event.name} />
+        <button type="button" className="ep-details-btn" onClick={onOpen}>
+          Details <ArrowIcon className="ep-btn-icon" />
+        </button>
+      </div>
+    </article>
+  );
+}
+
+function TicketCard({ event, added, onToggle, onOpen }) {
+  const cat = categoryOf(event.category);
+  const meta = [];
+  if (event.rounds) meta.push(`${event.rounds.length} rounds`);
+  if (event.games) meta.push(event.games.map((g) => g.name).join(' · '));
+  return (
+    <article className={`ep-ticket ${added ? 'is-added' : ''}`} style={{ '--hue': cat.hue }}>
+      <div className="ep-ticket-body">
+        <CategoryChip id={event.category} small />
+        <h3 className="ep-ticket-title">
+          <button type="button" className="ep-stretch" onClick={onOpen}>
+            {event.name}
+          </button>
+        </h3>
+        <RotatingTagline lines={cardTaglines(event)} interval={4200} />
+        <div className="ep-ticket-meta">
+          {meta.map((m) => (
+            <span key={m}>{m}</span>
+          ))}
+          {event.docUrl && (
+            <span className="ep-meta-doc">
+              <DocIcon /> Rules doc
+            </span>
+          )}
+        </div>
+      </div>
+      <div className="ep-ticket-stub">
+        <span className="ep-ticket-fee">{formatFee(event.fee)}</span>
+        <span className="ep-ticket-fee-label">entry</span>
+        <RegisterButton added={added} onToggle={onToggle} eventName={event.name} size="sm" />
+      </div>
+    </article>
   );
 }

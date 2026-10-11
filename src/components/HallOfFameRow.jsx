@@ -16,9 +16,10 @@ const getSwipeMode = () =>
  * Touch devices ("swipe"): the page scrolls normally and the row is a native horizontal
  * swipe carousel that snaps each item to the centre.
  *
- * In both modes the parallax wall and the per-item depth follow the row's position.
+ * In both modes the per-item depth follows the row's position. An optional `heading`
+ * is rendered inside the pinned area so the title and row stay together.
  */
-export default function HallOfFameRow({ children, label = 'Committees' }) {
+export default function HallOfFameRow({ children, heading = null, label = 'Committees' }) {
   const [swipeMode, setSwipeMode] = useState(getSwipeMode);
   const [activeIndex, setActiveIndex] = useState(0);
   const [hasSwiped, setHasSwiped] = useState(false);
@@ -39,11 +40,9 @@ export default function HallOfFameRow({ children, label = 'Committees' }) {
     return () => mq.removeEventListener?.('change', onChange);
   }, []);
 
-  // Parallax + per-item depth, from the row's current horizontal position.
-  const applyDepth = useCallback((progress) => {
-    const gallery = galleryRef.current;
+  // Per-item depth, from the row's current horizontal position.
+  const applyDepth = useCallback(() => {
     const track = trackRef.current;
-    gallery.style.setProperty('--hof-scroll', progress.toFixed(1));
 
     const viewCenter = track.getBoundingClientRect().left + track.clientWidth / 2;
     const reach = track.clientWidth * 0.55;
@@ -72,7 +71,7 @@ export default function HallOfFameRow({ children, label = 'Committees' }) {
     if (!pin || !galleryRef.current || !track) return;
 
     if (swipeMode) {
-      applyDepth(track.scrollLeft);
+      applyDepth();
       return;
     }
 
@@ -85,7 +84,7 @@ export default function HallOfFameRow({ children, label = 'Committees' }) {
     }
     const progress = Math.min(Math.max(-pin.getBoundingClientRect().top, 0), travel);
     track.scrollLeft = progress;
-    applyDepth(progress);
+    applyDepth();
   }, [swipeMode, applyDepth]);
 
   const schedule = useCallback(() => {
@@ -142,14 +141,8 @@ export default function HallOfFameRow({ children, label = 'Committees' }) {
   return (
     <div className={`hof-pin ${swipeMode ? 'hof-mode-swipe' : 'hof-mode-pinned'}`} ref={pinRef}>
       <div className="hof-sticky">
+        {heading && <div className="hof-heading">{heading}</div>}
         <div className="hof-gallery" ref={galleryRef}>
-          <div className="hof-wall" aria-hidden="true">
-            <div className="hof-layer hof-wall-far" />
-            <div className="hof-layer hof-wall-mid" />
-            <div className="hof-layer hof-rail" />
-            <div className="hof-layer hof-floor" />
-          </div>
-
           <div className="hof-track" ref={trackRef} role="region" aria-label={label}>
             {React.Children.map(children, (child) => (
               <div className="hof-item">{child}</div>
