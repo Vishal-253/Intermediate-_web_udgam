@@ -5,10 +5,11 @@ import { CategoryChip, RegisterButton, RotatingTagline, categoryOf } from './eve
 import { ArrowIcon, CategoryIcon, CloseIcon, DocIcon, SearchIcon } from './events/eventIcons';
 import EventDrawer from './events/EventDrawer';
 import RegistrationTray from './events/RegistrationTray';
+import HeadlinerCarousel from './events/HeadlinerCarousel';
 
 const PASS_KEY = 'udgam_event_pass';
 
-// Headliner order: the first one gets the large spotlight tile.
+// Headliner order: the first one starts in the centre of the carousel.
 const SPOTLIGHT_ORDER = [
   'dance-competition',
   'food-fiesta',
@@ -123,8 +124,6 @@ export default function EventsPage({ onContactTeam }) {
 
   const minFee = Math.min(...events.map((e) => e.fee));
   const openEvent = events.find((e) => e.id === openId) || null;
-  // spotlight tile only when the featured layout is showing the full headliner set
-  const showSpotlight = sort === 'featured' && headliners.length >= 3;
 
   return (
     <div className="ep-root">
@@ -250,19 +249,36 @@ export default function EventsPage({ onContactTeam }) {
             <h2 id="ep-headliners">Headliners</h2>
             <p>The big-stage events of Udgam.</p>
           </div>
-          <div className={`ep-bento ${showSpotlight ? 'has-spotlight' : ''}`}>
-            {headliners.map((e, i) => (
-              <HeadlinerTile
-                key={e.id}
-                event={e}
-                index={i}
-                spotlight={showSpotlight && i === 0}
-                added={pass.includes(e.id)}
-                onToggle={() => togglePass(e.id)}
-                onOpen={() => setOpenId(e.id)}
-              />
-            ))}
-          </div>
+          {headliners.length >= 3 ? (
+            <HeadlinerCarousel
+              items={headliners}
+              getKey={(e) => e.id}
+              paused={openId !== null}
+              label="Headliners"
+              renderItem={(e, i) => (
+                <HeadlinerTile
+                  event={e}
+                  index={i}
+                  added={pass.includes(e.id)}
+                  onToggle={() => togglePass(e.id)}
+                  onOpen={() => setOpenId(e.id)}
+                />
+              )}
+            />
+          ) : (
+            <div className="ep-bento">
+              {headliners.map((e, i) => (
+                <HeadlinerTile
+                  key={e.id}
+                  event={e}
+                  index={i}
+                  added={pass.includes(e.id)}
+                  onToggle={() => togglePass(e.id)}
+                  onOpen={() => setOpenId(e.id)}
+                />
+              ))}
+            </div>
+          )}
         </section>
       )}
 
@@ -326,11 +342,11 @@ export default function EventsPage({ onContactTeam }) {
   );
 }
 
-function HeadlinerTile({ event, index, spotlight, added, onToggle, onOpen }) {
+function HeadlinerTile({ event, index, added, onToggle, onOpen }) {
   const cat = categoryOf(event.category);
   return (
     <article
-      className={`ep-tile ${spotlight ? 'is-spotlight' : ''} ${added ? 'is-added' : ''}`}
+      className={`ep-tile ${added ? 'is-added' : ''}`}
       style={{ '--hue': cat.hue }}
     >
       <CategoryIcon id={cat.id} className="ep-tile-glyph" />

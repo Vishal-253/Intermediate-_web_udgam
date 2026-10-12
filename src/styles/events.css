@@ -540,11 +540,6 @@
   gap: 16px;
 }
 
-.ep-bento.has-spotlight > .is-spotlight {
-  grid-column: span 2;
-  grid-row: span 2;
-}
-
 .ep-tile {
   position: relative;
   isolation: isolate;
@@ -631,42 +626,151 @@
   padding-top: 6px;
 }
 
-/* Spotlight tile */
-.ep-tile.is-spotlight {
-  padding: 32px;
-  gap: 16px;
-  background:
-    radial-gradient(90% 80% at 100% 0%, oklch(0.86 0.1 var(--hue) / 0.9), transparent 60%),
-    radial-gradient(70% 60% at 0% 100%, oklch(0.93 0.06 30 / 0.8), transparent 60%),
-    linear-gradient(160deg, oklch(0.985 0.015 var(--hue)), oklch(0.94 0.045 var(--hue)));
+/* Headliner carousel: three in view, centre one emphasised */
+.ep-carousel {
+  --slide-w: min(440px, 40%);
+  --step: 98%; /* of the slide's own width */
+  position: relative;
 }
 
-.ep-tile.is-spotlight .ep-tile-glyph {
-  width: 340px;
-  height: 340px;
-  right: -40px;
-  bottom: -60px;
+.ep-carousel-stage {
+  display: grid;
+  padding: 18px 0 26px;
+  overflow: clip;
+  overflow-clip-margin: 16px;
+  touch-action: pan-y;
+  /* fade the side slides into the page at the edges */
+  -webkit-mask: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+  mask: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
 }
 
-.ep-tile.is-spotlight .ep-tile-title {
-  margin-top: auto;
-  font-size: clamp(2.2rem, 4.4vw, 3.6rem);
-  line-height: 1;
-  letter-spacing: -0.03em;
+.ep-slide {
+  grid-area: 1 / 1;
+  justify-self: center;
+  display: flex;
+  width: var(--slide-w);
+  z-index: calc(3 - max(var(--pos), -1 * var(--pos)));
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(calc(var(--pos) * var(--step))) scale(0.84);
+  transition:
+    transform 0.9s cubic-bezier(0.22, 0.8, 0.22, 1),
+    opacity 0.6s ease,
+    filter 0.6s ease;
 }
 
-.ep-tile.is-spotlight .ep-tagline {
-  font-size: clamp(1.15rem, 1.8vw, 1.45rem);
+.ep-slide-inner {
+  display: flex;
+  flex: 1;
 }
 
-.ep-tile.is-spotlight .ep-tile-desc {
-  max-width: 30rem;
-  font-size: 1rem;
+.ep-slide-inner > .ep-tile {
+  flex: 1;
+  min-height: 340px;
+}
+
+.ep-slide.is-side {
+  opacity: 0.62;
+  filter: saturate(0.75);
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.ep-slide.is-side:hover {
+  opacity: 0.85;
+}
+
+/* the side tiles are inert; keep their hover lift from fighting the transform */
+.ep-slide.is-side .ep-tile:hover {
+  transform: none;
+}
+
+.ep-slide.is-center {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(0) scale(1);
+}
+
+.ep-slide.is-center .ep-tile {
+  box-shadow:
+    0 1px 0 oklch(1 0 0) inset,
+    0 34px 70px -34px oklch(0.45 0.16 var(--hue) / 1),
+    0 0 0 1px oklch(0.8 0.08 var(--hue) / 0.6);
+}
+
+.ep-slide.is-center .ep-tile-title {
+  font-size: clamp(1.7rem, 2.6vw, 2.15rem);
+}
+
+.ep-slide .ep-tile-desc {
   -webkit-line-clamp: 3;
 }
 
-.ep-tile.is-spotlight .ep-tile-actions {
-  margin-top: 8px;
+.ep-carousel-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+
+.ep-carousel-prev {
+  transform: scaleX(-1);
+}
+
+.ep-carousel-dots {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ep-carousel-dot {
+  position: relative;
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 999px;
+  background: oklch(0.6 0.08 350 / 0.3);
+  cursor: pointer;
+  transition: width 0.35s ease, background 0.35s ease;
+}
+
+.ep-carousel-dot.is-active {
+  width: 30px;
+  background: oklch(0.6 0.08 350 / 0.3);
+}
+
+.ep-carousel-dot-fill,
+.ep-carousel-dot.is-active:not(:has(.ep-carousel-dot-fill))::after {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--primary);
+}
+
+.ep-carousel-dot.is-active:not(:has(.ep-carousel-dot-fill))::after {
+  content: '';
+}
+
+.ep-carousel-dot-fill {
+  transform-origin: left;
+  animation: ep-dot-fill linear forwards;
+}
+
+@keyframes ep-dot-fill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ep-slide {
+    transition: opacity 0.2s ease;
+  }
 }
 
 /* --------------------------------------------------- Open floor (tickets) */
@@ -1369,14 +1473,19 @@
     grid-template-columns: 1fr;
   }
 
-  .ep-bento.has-spotlight > .is-spotlight {
-    grid-column: auto;
-    grid-row: auto;
+  .ep-carousel {
+    --slide-w: 76%;
+    --step: 86%;
   }
 
-  .ep-tile.is-spotlight {
-    min-height: 360px;
-    padding: 24px;
+  .ep-carousel-stage {
+    margin-inline: -14px;
+    -webkit-mask: none;
+    mask: none;
+  }
+
+  .ep-slide-inner > .ep-tile {
+    min-height: 320px;
   }
 
   .ep-tile-title {
