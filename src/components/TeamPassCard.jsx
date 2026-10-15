@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { subscribeTilt } from '../utils/deviceTilt';
+import { teamPhotoFor } from '../utils/teamPhotos';
 
 const ANIMATION_CONFIG = {
   INITIAL_DURATION: 1200,
@@ -330,7 +331,8 @@ export default function TeamPassCard({
 
   const roleLabel = member.tag || member.badgeText || member.role || 'Crew';
 
-  const hasPhoto = Boolean(member.image) && !imageError;
+  const photo = member.image || teamPhotoFor(member.id);
+  const hasPhoto = Boolean(photo) && !imageError;
 
   const cardStyle = useMemo(
     () => ({
@@ -376,7 +378,7 @@ export default function TeamPassCard({
             <div className="tc-avatar">
               {hasPhoto ? (
                 <img
-                  src={member.image}
+                  src={photo}
                   alt={member.name}
                   className="tc-avatar-img"
                   loading="lazy"

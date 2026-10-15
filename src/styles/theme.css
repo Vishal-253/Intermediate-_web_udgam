@@ -658,3 +658,111 @@ h1, h2, h3 {
 .deck-deal-card-slot::before {
   background: color-mix(in oklab, var(--blossom-deep) 40%, transparent);
 }
+
+/* ==========================================================================
+   TEAM PAGE: lakeside blossom backdrop
+   One fixed painting behind the whole page; the page's tokens shift to its
+   palette (lake-blue ink, sky lines, sakura pink, spring leaf).
+   ========================================================================== */
+.team-page-root {
+  --lake-ink: oklch(0.3 0.07 248);
+  --lake: oklch(0.5 0.12 240);
+  --sky: oklch(0.74 0.11 232);
+  --sakura: oklch(0.66 0.15 355);
+  --spring: oklch(0.72 0.14 135);
+
+  --foreground: var(--lake-ink);
+  --muted-foreground: oklch(0.48 0.06 240);
+  --text-secondary: oklch(0.4 0.06 240);
+  --border: oklch(0.86 0.04 230 / 0.7);
+  --ring: var(--sky);
+  --blossom: oklch(0.86 0.08 355);
+  --blossom-deep: var(--sakura);
+  --gradient-blossom: linear-gradient(120deg, var(--lake) 10%, oklch(0.6 0.13 300) 55%, var(--sakura) 90%);
+  --background: oklch(0.97 0.02 230);
+
+  background: transparent;
+}
+
+/* the painting, pinned to the viewport so it stays put while the page scrolls */
+.team-page-root::before,
+.team-page-root::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.team-page-root::before {
+  background: url('/assets/images/backgrounds/team-lake.webp') center 58% / cover no-repeat;
+}
+
+/* soft sky veil: keeps titles readable without hiding the scene */
+.team-page-root::after {
+  background:
+    linear-gradient(
+      180deg,
+      oklch(0.97 0.02 230 / 0.62) 0%,
+      oklch(0.97 0.02 230 / 0.3) 45%,
+      oklch(0.97 0.025 200 / 0.42) 100%
+    );
+}
+
+.team-page-root .team-ambient-glow {
+  background: radial-gradient(ellipse at center, oklch(1 0 0 / 0.55) 0%, transparent 70%);
+}
+
+/* headings sit directly on the painting: give them a light halo */
+.team-page-root .leadership-role-title {
+  color: var(--lake);
+  text-shadow: 0 1px 14px oklch(1 0 0 / 0.9);
+}
+
+.team-page-root .organising-committee-title {
+  filter: drop-shadow(0 1px 10px oklch(1 0 0 / 0.85));
+}
+
+/* member cards: white glass with a sky-tinted glow */
+.team-page-root .tc-card {
+  background: oklch(0.995 0.006 230 / 0.94);
+  box-shadow: color-mix(in oklab, var(--lake) 32%, transparent)
+    calc((var(--pointer-from-left, 0.5) * 10px) - 5px)
+    calc((var(--pointer-from-top, 0.5) * 16px) - 8px) 30px -8px;
+}
+
+.team-page-root .team-pass-card-wrapper {
+  --behind-glow-color: color-mix(in oklab, var(--sky) 60%, transparent);
+}
+
+.team-page-root .tc-avatar-ring {
+  border-color: color-mix(in oklab, var(--sky) 45%, white);
+}
+
+/* deal overlay: frosted lake glass instead of blush */
+.team-page-root .deck-page-overlay-root {
+  background: oklch(0.96 0.025 230 / 0.5);
+}
+
+.team-page-root .deck-overlay-ambient-halo {
+  background: radial-gradient(ellipse at 50% 35%, oklch(1 0 0 / 0.6) 0%, transparent 70%);
+}
+
+.team-page-root .hof-swipe-cue,
+.team-page-root .hof-swipe-count {
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: oklch(1 0 0 / 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--lake);
+}
+
+/* the shared footer sits on the painting too: frost it so the copy stays legible */
+body:has(.team-page-root) .footer-section {
+  /* the team page is its own layer (z-index 2); lift the footer over its fixed backdrop */
+  z-index: 3;
+  background: oklch(0.98 0.015 230 / 0.78);
+  backdrop-filter: blur(16px) saturate(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+}
