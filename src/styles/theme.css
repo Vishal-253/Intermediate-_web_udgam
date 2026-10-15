@@ -684,29 +684,96 @@ h1, h2, h3 {
   background: transparent;
 }
 
-/* the painting, pinned to the viewport so it stays put while the page scrolls */
-.team-page-root::before,
-.team-page-root::after {
-  content: '';
+/* ---- Scroll-driven landscape (TeamBackdrop) ---- */
+.team-backdrop {
   position: fixed;
   inset: 0;
   z-index: -1;
+  overflow: hidden;
   pointer-events: none;
+  background: oklch(0.86 0.06 235);
 }
 
-.team-page-root::before {
-  background: url('/assets/images/backgrounds/team-lake.webp') center 58% / cover no-repeat;
+.tb-world {
+  position: absolute;
+  inset: -4vh -3vw;
+  /* the whole scene leans away from the pointer a touch (desktop) */
+  transform: translate3d(calc(var(--mx, 0) * -14px), calc(var(--my, 0) * -10px), 0);
+}
+
+.tb-panorama {
+  /* one tall strip; wide enough on portrait screens that it still has room to travel */
+  position: absolute;
+  top: 0;
+  left: 50%;
+  display: block;
+  width: max(100%, 95vh);
+  height: auto;
+  max-width: none;
+  transform: translate3d(-50%, var(--shift, 0px), 0);
+  will-change: transform;
+  user-select: none;
 }
 
 /* soft sky veil: keeps titles readable without hiding the scene */
-.team-page-root::after {
+.tb-veil {
+  position: absolute;
+  inset: 0;
   background:
+    radial-gradient(ellipse 70% 55% at 50% 45%, oklch(0.99 0.01 230 / 0.28), transparent 75%),
     linear-gradient(
       180deg,
-      oklch(0.97 0.02 230 / 0.62) 0%,
-      oklch(0.97 0.02 230 / 0.3) 45%,
-      oklch(0.97 0.025 200 / 0.42) 100%
+      oklch(0.97 0.02 230 / 0.55) 0%,
+      oklch(0.97 0.02 230 / 0.22) 45%,
+      oklch(0.97 0.025 200 / 0.38) 100%
     );
+}
+
+/* foreground petals: closer than the scenery, so they fall faster and catch the scroll wind */
+.tb-petals {
+  position: absolute;
+  inset: 0;
+  transform: translate3d(0, var(--wind, 0px), 0);
+}
+
+.tb-petal {
+  position: absolute;
+  top: -6vh;
+  left: var(--x);
+  width: var(--size);
+  aspect-ratio: 1 / 1.35;
+  border-radius: 80% 0 80% 0;
+  background: linear-gradient(135deg, oklch(0.95 0.04 355), oklch(0.82 0.1 355));
+  opacity: 0.75;
+  filter: blur(var(--blur));
+  animation:
+    tb-fall var(--fall) linear infinite,
+    tb-sway var(--sway) ease-in-out infinite alternate;
+  animation-delay: var(--delay), calc(var(--delay) / 3);
+}
+
+@keyframes tb-fall {
+  to {
+    translate: 0 112vh;
+  }
+}
+
+@keyframes tb-sway {
+  from {
+    transform: translateX(-26px) rotate(-30deg);
+  }
+  to {
+    transform: translateX(26px) rotate(40deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tb-petals {
+    display: none;
+  }
+  .tb-world {
+    transform: none;
+  }
 }
 
 .team-page-root .team-ambient-glow {
@@ -765,4 +832,48 @@ body:has(.team-page-root) .footer-section {
   background: oklch(0.98 0.015 230 / 0.78);
   backdrop-filter: blur(16px) saturate(1.2);
   -webkit-backdrop-filter: blur(16px) saturate(1.2);
+}
+
+/* Decks stay solid over the landscape: distant decks in the row are dimmed with a
+   muted tone instead of transparency, and the stacked cards behind a cover are opaque. */
+.hof-item {
+  opacity: 1;
+  filter: saturate(calc(1 - var(--hof-far, 0) * 0.35)) brightness(calc(1 - var(--hof-far, 0) * 0.05));
+}
+
+.deck-card-layer.layer-back,
+.deck-card-layer.layer-mid {
+  opacity: 1;
+}
+
+.deck-card-layer.layer-mid {
+  background: linear-gradient(180deg, oklch(0.97 0.02 350), oklch(0.93 0.035 350));
+}
+
+.deck-card-layer.layer-back {
+  background: linear-gradient(180deg, oklch(0.94 0.03 350), oklch(0.9 0.045 350));
+}
+
+/* Conveners / General Secretary: titled groups of cards (no decks) */
+.core-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  max-width: 888px; /* three cards per row */
+}
+
+.core-group-cards {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 40px 48px;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .core-group-cards {
+    gap: 28px;
+  }
 }

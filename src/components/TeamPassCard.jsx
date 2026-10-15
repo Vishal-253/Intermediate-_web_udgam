@@ -18,6 +18,9 @@ const CHECK = (
   <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12" /></svg>
 );
 
+// Phone numbers are placeholders for now; flip to true once the real ones are in teamData.
+const SHOW_PHONE = false;
+
 // Maximum card rotation (degrees) at the card edge / full phone tilt.
 const MAX_ROTATE_X = 18;
 const MAX_ROTATE_Y = 16;
@@ -396,9 +399,9 @@ export default function TeamPassCard({
           <h3 className="tc-name" title={member.name}>{member.name}</h3>
           {!hideRoleInside && <div className="tc-role">{roleLabel}</div>}
 
-          {(member.phone || member.email) && (
+          {((SHOW_PHONE && member.phone) || member.email) && (
             <div className="tc-contacts">
-              {member.phone && (
+              {SHOW_PHONE && member.phone && (
                 <button
                   type="button"
                   className={`tc-icon-btn ${copied === 'phone' ? 'copied' : ''}`}

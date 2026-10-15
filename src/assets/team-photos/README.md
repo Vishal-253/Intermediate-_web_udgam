@@ -6,3 +6,5 @@ Drop a photo here named after the member's `id` in `src/data/teamData.js`, and i
 - Formats: `.webp` (preferred), `.jpg`, `.jpeg`, `.png`, `.avif`
 - Square crop, face centred, about 600×600px and under ~150 KB. The card shows it in a circle.
 - Members without a photo keep the grey silhouette.
+
+`originals/` holds the full-size photos these were cropped from. It is not bundled into the site and is git-ignored.

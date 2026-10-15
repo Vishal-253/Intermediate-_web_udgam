@@ -1,0 +1,17 @@
+# dependencies
+node_modules/
+
+# editor / tool state
+.claude/
+.DS_Store
+
+# team data notes (local working lists)
+/TEAM_MEMBER_IDS.md
+/MISSING_PHOTOS.md
+
+# full-size uncropped team photos (cropped 600x600 webp copies live one level up)
+src/assets/team-photos/originals/
+
+# design references and old unused images (not used by the site)
+/references/
+/assets/

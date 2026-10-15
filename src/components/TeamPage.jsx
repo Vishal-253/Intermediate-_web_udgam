@@ -1,92 +1,23 @@
-import React, { useState, useMemo } from 'react';
-import { teamMembers, committeeCategories, committeeMembers } from '../data/teamData';
-import TeamPassCard from './TeamPassCard';
+import React, { useState } from 'react';
 import TeamCardDeck from './TeamCardDeck';
-import HallOfFameRow from './HallOfFameRow';
 import TeamDeckOverlay from './TeamDeckOverlay';
 import TiltPrompt from './TiltPrompt';
+import TeamBackdrop from './team/TeamBackdrop';
+import LeadershipSection from './team/LeadershipSection';
+import CoreTeamSection from './team/CoreTeamSection';
+import OrganisingCommitteeSection from './team/OrganisingCommitteeSection';
+import {
+  president,
+  vicePresidents,
+  treasurer,
+  conveners,
+  generalSecretaries,
+  operationalDecks,
+} from './team/teamDecks';
 
 export default function TeamPage() {
-  // Track currently active committee deck displayed in the overlay view
+  // committee deck currently dealt out in the overlay
   const [activeDeck, setActiveDeck] = useState(null);
-
-  const handleOpenDeck = (deck) => {
-    setActiveDeck(deck);
-  };
-
-  const handleCloseDeck = () => {
-    setActiveDeck(null);
-  };
-
-  // 1. President (Single Standalone Card)
-  const president = useMemo(() => {
-    return teamMembers.find((m) => m.role === 'President' || m.badgeType === 'president') || teamMembers[0];
-  }, []);
-
-  // 2. Vice Presidents (Two separate cards side by side)
-  const vicePresidents = useMemo(() => {
-    return teamMembers.filter((m) => m.role === 'Vice President' || m.badgeType === 'vp');
-  }, []);
-
-  // 3. Treasurer (Single Standalone Card)
-  const treasurer = useMemo(() => {
-    return teamMembers.find((m) => m.role === 'Treasurer' || m.badgeType === 'treasurer') || teamMembers[3];
-  }, []);
-
-  // 4. Organising Committee: Individual card deck for every committee
-  const committeeDecks = useMemo(() => {
-    // Conveners
-    const convenerMembers = teamMembers.filter(
-      (m) => m.role === 'Convener' || m.badgeType === 'convener'
-    );
-    // General Secretary
-    const gensecMembers = teamMembers.filter(
-      (m) => m.role?.toLowerCase().includes('secretary') || m.badgeType === 'gensec'
-    );
-
-    // 15 Operational Wings
-    const operationalDecks = committeeCategories
-      .filter((c) => c.id !== 'all')
-      .map((cat) => {
-        const members = committeeMembers.filter((m) => m.committeeId === cat.id);
-        let title = cat.label;
-        if (cat.id === 'web-dev') title = 'Web Development';
-        if (cat.id === 'publicity') title = 'Public Relations';
-
-        return {
-          id: cat.id,
-          title: title,
-          subtitle: cat.fullName || `${title} Committee`,
-          roleText: `${members.length} PASSES IN DECK`,
-          icon: cat.icon || '🎴',
-          coverImage: `/assets/images/committees/${cat.id}.webp`,
-          members: members
-        };
-      });
-
-    const executiveDecks = [
-      {
-        id: 'conveners',
-        coverImage: '/assets/images/committees/conveners.webp',
-        title: 'Conveners',
-        subtitle: 'Core Operations & Orchestration',
-        roleText: `${convenerMembers.length} PASSES IN DECK`,
-        icon: '⚖️',
-        members: convenerMembers
-      },
-      {
-        id: 'gensec',
-        coverImage: '/assets/images/committees/gensec.webp',
-        title: 'General Secretary',
-        subtitle: 'Executive Secretariat',
-        roleText: `${gensecMembers.length} PASSES IN DECK`,
-        icon: '📜',
-        members: gensecMembers
-      }
-    ];
-
-    return { executiveDecks, operationalDecks };
-  }, []);
 
   const renderDeck = (deck) => (
     <TeamCardDeck
@@ -99,80 +30,23 @@ export default function TeamPage() {
       coverImage={deck.coverImage}
       members={deck.members}
       isOpen={activeDeck?.id === deck.id}
-      onToggle={() => handleOpenDeck(deck)}
+      onToggle={() => setActiveDeck(deck)}
     />
   );
 
   return (
     <div className={`team-page-root ${activeDeck ? 'team-page-has-deck-overlay' : ''}`}>
-      {/* Upper Ambient Atmosphere Glow */}
-      <div className="team-ambient-glow" aria-hidden="true" />
+      <TeamBackdrop />
 
       <main className="team-hierarchical-layout">
-        {/* ==================================================================
-            1. PRESIDENT (Single Standalone Card with Title Above)
-            ================================================================== */}
-        <section className="team-tier-section tier-president" aria-label="President">
-          <div className="leadership-card-col">
-            <h2 className="leadership-role-title">President</h2>
-            {president && <TeamPassCard member={president} hideRoleInside={true} />}
-          </div>
-        </section>
-
-        {/* ==================================================================
-            2. VICE PRESIDENTS (Two separate cards side by side with Title Above)
-            ================================================================== */}
-        <section className="team-tier-section tier-vice-presidents" aria-label="Vice Presidents">
-          <div className="tier-content tier-pair">
-            {vicePresidents.map((vp) => (
-              <div key={vp.id} className="leadership-card-col">
-                <h2 className="leadership-role-title">Vice President</h2>
-                <TeamPassCard member={vp} hideRoleInside={true} />
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* ==================================================================
-            3. TREASURER (Single Standalone Card with Title Above)
-            ================================================================== */}
-        <section className="team-tier-section tier-treasurer" aria-label="Treasurer">
-          <div className="leadership-card-col">
-            <h2 className="leadership-role-title">Treasurer</h2>
-            {treasurer && <TeamPassCard member={treasurer} hideRoleInside={true} />}
-          </div>
-        </section>
-
-        {/* Conveners & General Secretary decks, above the organising committee */}
-        <section className="team-tier-section tier-executive-decks" aria-label="Conveners and General Secretary">
-          <div className="committee-decks-grid">
-            {committeeDecks.executiveDecks.map(renderDeck)}
-          </div>
-        </section>
-
-        {/* Organising Committee: operational wings, starting from Sponsorship */}
-        <section className="team-tier-section tier-organising-committee" aria-label="Organising Committee">
-          <HallOfFameRow
-            label="Organising Committee"
-            heading={
-              <div className="organising-committee-header">
-                <h2 className="organising-committee-title">Organising Committee</h2>
-              </div>
-            }
-          >
-            {committeeDecks.operationalDecks.map(renderDeck)}
-          </HallOfFameRow>
-        </section>
+        <LeadershipSection president={president} vicePresidents={vicePresidents} treasurer={treasurer} />
+        <CoreTeamSection title="Conveners" members={conveners} />
+        <CoreTeamSection title="General Secretary" label="General Secretaries" members={generalSecretaries} />
+        <OrganisingCommitteeSection decks={operationalDecks} renderDeck={renderDeck} />
       </main>
 
-      {/* ==================================================================
-          5. COMMITTEE DECK OVERLAY VIEW
-          Appears over the previous teams page with translucent background.
-          Profiles deal in from left to right as realistic playing cards.
-          ================================================================== */}
-      {activeDeck && (
-        <TeamDeckOverlay deck={activeDeck} onClose={handleCloseDeck} />
-      )}
+      {/* Deals the chosen committee's cards over the translucent page */}
+      {activeDeck && <TeamDeckOverlay deck={activeDeck} onClose={() => setActiveDeck(null)} />}
 
       <TiltPrompt />
     </div>
